@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valter Motos — Sistema de Gestão</title>
+<style>
+  /* ===== RESET & VARIÁVEIS ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0e11;
+    --bg2:       #161820;
+    --bg3:       #1e2028;
+    --border:    #2a2d38;
+    --accent:    #f97316;
+    --accent2:   #fb923c;
+    --green:     #22c55e;
+    --red:       #ef4444;
+    --yellow:    #eab308;
+    --blue:      #3b82f6;
+    --text:      #e8e9ed;
+    --muted:     #8b8fa8;
+    --radius:    10px;
+    --shadow:    0 4px 24px rgba(0,0,0,.45);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -.5px;
+  }
+
+  .logo span { color: var(--accent); }
+  .logo-icon { font-size: 1.6rem; }
+
+  .header-actions { display: flex; gap: 8px; }
+
+  /* ===== NAVEGAÇÃO ===== */
+  nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 2px;
+    padding: 0 24px;
+    overflow-x: auto;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 14px 18px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ===== LAYOUT ===== */
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ===== DASHBOARD ===== */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .card.orange::before { background: var(--accent); }
+  .card.green::before  { background: var(--green); }
+  .card.red::before    { background: var(--red); }
+  .card.blue::before   { background: var(--blue); }
+
+  .card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+  .card-value { font-size: 1.8rem; font-weight: 700; }
+  .card-icon  { position: absolute; right: 16px; top: 16px; font-size: 1.8rem; opacity: .15; }
+
+  /* ===== SEÇÃO TÍTULO ===== */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .section-title { font-size: 1rem; font-weight: 700; }
+
+  /* ===== BOTÕES ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all .15s;
+  }
+
+  .btn-primary  { background: var(--accent);  color: #fff; }
+  .btn-primary:hover  { background: var(--accent2); }
+  .btn-success  { background: var(--green);   color: #fff; }
+  .btn-success:hover  { filter: brightness(1.1); }
+  .btn-danger   { background: var(--red);     color: #fff; }
+  .btn-danger:hover   { filter: brightness(1.1); }
+  .btn-info     { background: var(--blue);    color: #fff; }
+  .btn-info:hover     { filter: brightness(1.1); }
+  .btn-outline  { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover  { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost    { background: var(--bg3); color: var(--text); }
+  .btn-ghost:hover    { background: var(--border); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-whatsapp { background: #25D366; color: #fff; }
+  .btn-whatsapp:hover { background: #1ebe5d; }
+
+  /* ===== FILTROS ===== */
+  .filters {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+
+  input, select, textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color .2s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  select option { background: var(--bg3); }
+
+  /* ===== TABELA ===== */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr { background: var(--bg3); }
+
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  th:hover { color: var(--text); }
+
+  td {
+    padding: 11px 14px;
+    border-top: 1px solid var(--border);
+    vertical-align: middle;
+    font-size: 13px;
+  }
+
+  tbody tr:hover { background: rgba(255,255,255,.03); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .4px;
+  }
+
+  .badge-green  { background: rgba(34,197,94,.15); color: var(--green); }
+  .badge-red    { background: rgba(239,68,68,.15);  color: var(--red); }
+  .badge-yellow { background: rgba(234,179,8,.15);  color: var(--yellow); }
+  .badge-blue   { background: rgba(59,130,246,.15); color: var(--blue); }
+  .badge-orange { background: rgba(249,115,22,.15); color: var(--accent); }
+
+  .actions { display: flex; gap: 6px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+  /* ===== MODAL ===== */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .modal-title { font-size: 1.1rem; font-weight: 700; }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .form-grid { display: grid; gap: 16px; }
+  .form-grid-2 { grid-template-columns: 1fr 1fr; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea { width: 100%; }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ===== RELATÓRIO ===== */
+  .report-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .report-box h3 { font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 16px; }
+
+  .report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+
+  .report-item { text-align: center; padding: 14px; background: var(--bg3); border-radius: 8px; }
+  .report-item .label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .report-item .value { font-size: 1.3rem; font-weight: 700; }
+
+  .report-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+
+  /* ===== NOTIFICAÇÃO TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    transform: translateY(60px);
+    opacity: 0;
+    transition: all .3s;
+    z-index: 999;
+  }
+
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-left-color: var(--green); }
+  #toast.error   { border-left-color: var(--red); }
+
+  /* ===== MODAL IMPRESSÃO ===== */
+  .print-modal-body { display: flex; flex-direction: column; gap: 16px; }
+  .print-select-row { display: flex; gap: 12px; }
+  .print-select-row .form-group { flex: 1; }
+
+  /* ===== RELATÓRIO CONTÁBIL (visível só na impressão) ===== */
+  #relatorio-impressao { display: none; }
+
+  /* ===== IMPRESSÃO ===== */
+  @media print {
+    /* Oculta tudo da interface */
+    header, nav, main, .filters, .actions, .report-actions,
+    .header-actions, #toast, .overlay, #relatorio-impressao ~ * { display: none !important; }
+
+    body {
+      background: #fff !important;
+      color: #000 !important;
+      font-family: 'Arial', sans-serif;
+      font-size: 10pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Mostra apenas o relatório contábil */
+    #relatorio-impressao { display: block !important; }
+
+    /* ── Estrutura do documento ── */
+    .nf-page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 14mm 16mm 14mm 16mm;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    /* ── Cabeçalho nota fiscal ── */
+    .nf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border: 2px solid #000;
+      margin-bottom: 0;
+    }
+
+    .nf-empresa {
+      flex: 1;
+      padding: 10px 14px;
+      border-right: 2px solid #000;
+    }
+
+    .nf-empresa-nome {
+      font-size: 16pt;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .nf-empresa-sub {
+      font-size: 8pt;
+      color: #444;
+      margin-top: 2px;
+    }
+
+    .nf-empresa-info {
+      font-size: 8pt;
+      margin-top: 8px;
+      line-height: 1.7;
+      color: #222;
+    }
+
+    .nf-docbox {
+      width: 62mm;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .nf-docbox-title {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .nf-docbox-num {
+      font-size: 20pt;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .nf-docbox-periodo {
+      font-size: 8pt;
+      margin-top: 6px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .nf-docbox-emissao {
+      font-size: 7.5pt;
+      color: #555;
+      margin-top: 3px;
+    }
+
+    /* ── Linha de identificação do documento ── */
+    .nf-tipo-doc {
+      background: #000;
+      color: #fff;
+      text-align: center;
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      margin-bottom: 0;
+    }
+
+    /* ── Seção de dados ── */
+    .nf-section {
+      border: 1px solid #000;
+      border-top: none;
+      margin-bottom: 0;
+    }
+
+    .nf-section-title {
+      background: #000;
+      color: #fff;
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+    }
+
+    .nf-section-body {
+      padding: 8px 10px;
+    }
+
+    /* ── Resumo financeiro ── */
+    .nf-resumo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid #ddd;
+    }
+
+    .nf-resumo-item {
+      padding: 6px 10px;
+      border-right: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .nf-resumo-item:last-child { border-right: none; }
+
+    .nf-resumo-label {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+
+    .nf-resumo-valor {
+      font-size: 11pt;
+      font-weight: 900;
+    }
+
+    /* ── Totais por pagamento ── */
+    .nf-pagamentos-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid #ddd;
+    }
+
+    .nf-pag-item {
+      padding: 6px 10px;
+      border-right: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .nf-pag-item:last-child { border-right: none; }
+    .nf-pag-label { font-size: 7pt; text-transform: uppercase; letter-spacing: .8px; color: #666; margin-bottom: 2px; }
+    .nf-pag-valor { font-size: 9.5pt; font-weight: 700; }
+
+    /* ── Tabela de serviços ── */
+    .nf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8pt;
+      margin-top: 0;
+    }
+
+    .nf-table thead tr {
+      background: #000;
+      color: #fff;
+    }
+
+    .nf-table th {
+      padding: 4px 6px;
+      text-align: left;
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      border: none;
+    }
+
+    .nf-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    .nf-table tbody tr:nth-child(even) { background: #f9f9f9; }
+    .nf-table tbody tr:last-child td { border-bottom: 2px solid #000; }
+
+    .nf-table .col-seq     { width: 20px; text-align: center; color: #777; }
+    .nf-table .col-cliente { width: 80px; }
+    .nf-table .col-data    { width: 60px; white-space: nowrap; }
+    .nf-table .col-moto    { width: 85px; font-weight: 600; }
+    .nf-table .col-desc    { }
+    .nf-table .col-saida   { width: 60px; white-space: nowrap; }
+    .nf-table .col-pag     { width: 52px; }
+    .nf-table .col-status  { width: 40px; text-align: center; }
+    .nf-table .col-valor   { width: 55px; text-align: right; font-weight: 700; }
+
+    .nf-status-pago     { font-weight: 700; color: #000; }
+    .nf-status-pendente { font-weight: 700; color: #777; font-style: italic; }
+
+    /* ── Totalizador final ── */
+    .nf-totais {
+      border: 2px solid #000;
+      border-top: none;
+      display: flex;
+      justify-content: flex-end;
+      align-items: stretch;
+    }
+
+    .nf-total-box {
+      padding: 8px 16px;
+      text-align: right;
+      border-left: 1px solid #ccc;
+    }
+
+    .nf-total-box:first-child { border-left: none; }
+
+    .nf-total-label {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #555;
+      margin-bottom: 1px;
+    }
+
+    .nf-total-valor {
+      font-size: 12pt;
+      font-weight: 900;
+    }
+
+    .nf-total-destaque {
+      background: #000;
+      color: #fff;
+      padding: 8px 16px;
+    }
+
+    /* ── Rodapé ── */
+    .nf-footer {
+      border: 1px solid #000;
+      border-top: none;
+      padding: 7px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 7.5pt;
+      color: #444;
+    }
+
+    .nf-footer-obs { flex: 1; }
+    .nf-footer-ass { text-align: center; width: 60mm; }
+    .nf-footer-ass-line { border-top: 1px solid #000; padding-top: 3px; margin-top: 16px; font-size: 7pt; }
+
+    .nf-aviso-fiscal {
+      margin-top: 6px;
+      padding: 5px 10px;
+      border: 1px dashed #aaa;
+      font-size: 7pt;
+      color: #666;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── Controle de página ── */
+    .nf-page-break { page-break-before: always; }
+    @page { margin: 0; size: A4; }
+  }
+
+  /* ===== RESPONSIVO ===== */
+  @media (max-width: 640px) {
+    .form-grid-2 { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    .filters { gap: 8px; }
+    td, th { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-icon">🏍️</span>
+    <div>Valter <span>Motos</span></div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline btn-sm" onclick="abrirModalImpressao()">🖨️ Imprimir Relatório</button>
+  </div>
+</header>
+
+<!-- NAVEGAÇÃO -->
+<nav>
+  <button class="nav-btn active" onclick="showPage('dashboard', this)">📊 Dashboard</button>
+  <button class="nav-btn" onclick="showPage('servicos', this)">🔧 Serviços</button>
+  <button class="nav-btn" onclick="showPage('relatorio', this)">📋 Relatórios</button>
+  <button class="nav-btn" onclick="showPage('fechamento', this)">💰 Fechamento</button>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="page-dashboard" class="page active">
+    <div class="dashboard-grid" id="dashboard-cards"></div>
+
+    <div class="section-header">
+      <span class="section-title">⚡ Serviços Recentes</span>
+    </div>
+    <div class="table-wrap">
+      <table id="table-recentes">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Moto</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Entrada</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-recentes"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== SERVIÇOS ===== -->
+  <div id="page-servicos" class="page">
+    <div class="section-header">
+      <span class="section-title">🔧 Gerenciar Serviços</span>
+      <button class="btn btn-primary" onclick="abrirModal()">➕ Novo Serviço</button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Buscar</label>
+        <input type="text" id="filtro-texto" placeholder="Moto, serviço ou cliente..." oninput="aplicarFiltros()">
+      </div>
+      <div class="filter-group">
+        <label>Data Início</label>
+        <input type="date" id="filtro-inicio" onchange="aplicarFiltros()">
+      </div>
+      <div class="filter-group">
+        <label>Data Fim</label>
+        <input type="date" id="filtro-fim" onchange="aplicarFiltros()">
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="filtro-status" onchange="aplicarFiltros()">
+          <option value="">Todos</option>
+          <option value="pago">Pago</option>
+          <option value="pendente">Pendente</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Pagamento</label>
+        <select id="filtro-pagamento" onchange="aplicarFiltros()">
+          <option value="">Todos</option>
+          <option value="pix">Pix</option>
+          <option value="debito">Débito</option>
+          <option value="credito">Crédito</option>
+          <option value="dinheiro">Dinheiro</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ordenar</label>
+        <select id="filtro-ordem" onchange="aplicarFiltros()">
+          <option value="recente">Mais Recente</option>
+          <option value="antigo">Mais Antigo</option>
+          <option value="maior">Maior Valor</option>
+          <option value="menor">Menor Valor</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="limparFiltros()">🗑️ Limpar</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="ordenarPor('cliente')">Cliente ↕</th>
+            <th onclick="ordenarPor('moto')">Moto ↕</th>
+            <th onclick="ordenarPor('descricao')">Serviço ↕</th>
+            <th onclick="ordenarPor('valor')">Valor ↕</th>
+            <th onclick="ordenarPor('entrada')">Entrada ↕</th>
+            <th>Saída</th>
+            <th onclick="ordenarPor('status')">Status ↕</th>
+            <th onclick="ordenarPor('pagamento')">Pagamento ↕</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-servicos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== RELATÓRIOS ===== -->
+  <div id="page-relatorio" class="page">
+    <div class="section-header">
+      <span class="section-title">📋 Relatórios</span>
+    </div>
+
+    <!-- Filtro de período -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Período Início</label>
+        <input type="date" id="rel-inicio" onchange="atualizarRelatorio()">
+      </div>
+      <div class="filter-group">
+        <label>Período Fim</label>
+        <input type="date" id="rel-fim" onchange="atualizarRelatorio()">
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="filtrarMesAtual()">📅 Mês Atual</button>
+    </div>
+
+    <!-- Resumo -->
+    <div class="report-box">
+      <h3>Resumo Geral</h3>
+      <div class="report-grid" id="rel-resumo"></div>
+    </div>
+
+    <!-- Por forma de pagamento -->
+    <div class="report-box">
+      <h3>Por Forma de Pagamento</h3>
+      <div class="report-grid" id="rel-pagamentos"></div>
+    </div>
+
+    <!-- Ações de exportação -->
+    <div class="report-actions">
+      <button class="btn btn-success" onclick="exportarCSV()">📥 Exportar CSV</button>
+      <button class="btn btn-info" onclick="exportarXLSX()">📊 Exportar Excel</button>
+      <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">💬 Enviar WhatsApp</button>
+      <button class="btn btn-outline" onclick="abrirModalImpressao()">🖨️ Imprimir Relatório</button>
+    </div>
+
+    <!-- Tabela detalhada -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Cliente</th>
+            <th>Moto</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-relatorio"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== FECHAMENTO ===== -->
+  <div id="page-fechamento" class="page">
+    <div class="section-header">
+      <span class="section-title">💰 Fechamento Mensal</span>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>Mês</label>
+        <select id="fech-mes" onchange="atualizarFechamento()">
+          <option value="1">Janeiro</option>
+          <option value="2">Fevereiro</option>
+          <option value="3">Março</option>
+          <option value="4">Abril</option>
+          <option value="5">Maio</option>
+          <option value="6">Junho</option>
+          <option value="7">Julho</option>
+          <option value="8">Agosto</option>
+          <option value="9">Setembro</option>
+          <option value="10">Outubro</option>
+          <option value="11">Novembro</option>
+          <option value="12">Dezembro</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ano</label>
+        <input type="number" id="fech-ano" min="2020" max="2099" style="width:100px" onchange="atualizarFechamento()">
+      </div>
+    </div>
+
+    <div class="report-box">
+      <h3>Resumo do Fechamento</h3>
+      <div class="report-grid" id="fech-resumo"></div>
+    </div>
+
+    <div class="report-box">
+      <h3>Totais por Forma de Pagamento</h3>
+      <div class="report-grid" id="fech-pagamentos"></div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Serviços do Mês</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-success btn-sm" onclick="exportarFechamentoCSV()">📥 Exportar CSV</button>
+        <button class="btn btn-whatsapp btn-sm" onclick="enviarFechamentoWhatsApp()">💬 WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Cliente</th>
+            <th>Moto</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-fechamento"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL SERVIÇO -->
+<div class="overlay" id="overlay-servico">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-titulo">Novo Serviço</span>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Nome do Cliente</label>
+          <input type="text" id="f-cliente" placeholder="Ex: João da Silva">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF do Cliente</label>
+          <input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Modelo do Veículo *</label>
+        <input type="text" id="f-moto" placeholder="Ex: Honda CG 160, Yamaha Fazer 250..." required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição do Serviço *</label>
+        <textarea id="f-descricao" placeholder="Descreva o serviço realizado..." required></textarea>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Valor (R$) *</label>
+          <input type="number" id="f-valor" min="0" step="0.01" placeholder="0,00" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Forma de Pagamento *</label>
+          <select id="f-pagamento" required>
+            <option value="">Selecione...</option>
+            <option value="pix">Pix</option>
+            <option value="debito">Cartão de Débito</option>
+            <option value="credito">Cartão de Crédito</option>
+            <option value="dinheiro">Dinheiro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Data/Hora de Entrada *</label>
+          <input type="datetime-local" id="f-entrada" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data/Hora de Saída</label>
+          <input type="datetime-local" id="f-saida">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status do Pagamento *</label>
+        <select id="f-status" required>
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarServico()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div class="overlay" id="overlay-confirma">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <span class="modal-title">Confirmar exclusão</span>
+    </div>
+    <p style="color:var(--muted);margin-bottom:24px">Tem certeza que deseja remover este serviço? Essa ação não pode ser desfeita.</p>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharConfirma()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarExclusao()">🗑️ Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPRESSÃO -->
+<div class="overlay" id="overlay-impressao">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title">🖨️ Imprimir Relatório Contábil</span>
+      <button class="modal-close" onclick="fecharModalImpressao()">✕</button>
+    </div>
+    <div class="print-modal-body">
+      <p style="color:var(--muted);font-size:13px">Selecione o mês e ano para gerar o relatório contábil no formato de nota fiscal.</p>
+      <div class="print-select-row">
+        <div class="form-group">
+          <label class="form-label">Mês</label>
+          <select id="print-mes">
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+            <option value="3">Março</option><option value="4">Abril</option>
+            <option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7">Julho</option><option value="8">Agosto</option>
+            <option value="9">Setembro</option><option value="10">Outubro</option>
+            <option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ano</label>
+          <input type="number" id="print-ano" min="2020" max="2099" style="width:90px">
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--muted)">
+        📄 O relatório será gerado no formato de <strong style="color:var(--text)">nota fiscal contábil</strong> com todos os serviços do período, totais por forma de pagamento e resumo financeiro para a contabilidade.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModalImpressao()">Cancelar</button>
+      <button class="btn btn-primary" onclick="executarImpressao()">🖨️ Gerar e Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<!-- RELATÓRIO CONTÁBIL PARA IMPRESSÃO (oculto em tela, visível ao imprimir) -->
+<div id="relatorio-impressao"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   VALTER MOTOS — Sistema de Gestão de Serviços
+   Versão: 1.0  |  Desenvolvido com HTML, CSS e JS puro
+   ============================================================ */
+
+// ── ESTADO DA APLICAÇÃO ──────────────────────────────────────
+let servicos   = JSON.parse(localStorage.getItem('vm_servicos') || '[]');
+let editandoId = null;
+let excluindoId = null;
+let ordenacao  = { campo: 'entrada', asc: false };
+
+// ── UTILIDADES ───────────────────────────────────────────────
+
+/** Máscara de CPF */
+function mascaraCPF(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+  input.value = v;
+}
+
+/** Formata valor em Real brasileiro */
+function fmtBRL(v) {
+  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/** Formata datetime-local para exibição */
+function fmtDT(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+/** Retorna badge HTML para status */
+function badgeStatus(s) {
+  return s === 'pago'
+    ? `<span class="badge badge-green">✔ Pago</span>`
+    : `<span class="badge badge-red">⚠ Pendente</span>`;
+}
+
+/** Retorna badge HTML para forma de pagamento */
+function badgePag(p) {
+  const map = {
+    pix:      ['badge-blue',   '🔵 Pix'],
+    debito:   ['badge-green',  '💳 Débito'],
+    credito:  ['badge-orange', '💳 Crédito'],
+    dinheiro: ['badge-yellow', '💵 Dinheiro'],
+  };
+  const [cls, txt] = map[p] || ['badge-yellow', p];
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+
+/** Salva servicos no localStorage */
+function salvar() {
+  localStorage.setItem('vm_servicos', JSON.stringify(servicos));
+}
+
+/** Gera ID único */
+function gerarId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+/** Exibe toast de notificação */
+function toast(msg, tipo = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + tipo;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = '', 3000);
+}
+
+// ── NAVEGAÇÃO ────────────────────────────────────────────────
+
+function showPage(nome, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + nome).classList.add('active');
+  btn.classList.add('active');
+
+  // Atualiza a página ao navegar
+  if (nome === 'dashboard')   renderDashboard();
+  if (nome === 'servicos')    renderServicos();
+  if (nome === 'relatorio')   atualizarRelatorio();
+  if (nome === 'fechamento')  atualizarFechamento();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────
+
+function renderDashboard() {
+  const total     = servicos.reduce((s, x) => s + Number(x.valor), 0);
+  const pagos     = servicos.filter(x => x.status === 'pago');
+  const pendentes = servicos.filter(x => x.status === 'pendente');
+  const totalPago = pagos.reduce((s, x) => s + Number(x.valor), 0);
+
+  document.getElementById('dashboard-cards').innerHTML = `
+    <div class="card orange">
+      <div class="card-icon">💰</div>
+      <div class="card-label">Total Faturado</div>
+      <div class="card-value">${fmtBRL(total)}</div>
+    </div>
+    <div class="card blue">
+      <div class="card-icon">🔧</div>
+      <div class="card-label">Total de Serviços</div>
+      <div class="card-value">${servicos.length}</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">✔</div>
+      <div class="card-label">Total Recebido</div>
+      <div class="card-value">${fmtBRL(totalPago)}</div>
+    </div>
+    <div class="card red">
+      <div class="card-icon">⚠</div>
+      <div class="card-label">Pendentes</div>
+      <div class="card-value">${pendentes.length}</div>
+    </div>
+  `;
+
+  // Últimos 5 serviços
+  const recentes = [...servicos]
+    .sort((a, b) => new Date(b.entrada) - new Date(a.entrada))
+    .slice(0, 5);
+
+  const tbody = document.getElementById('tbody-recentes');
+  if (!recentes.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum serviço cadastrado ainda.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = recentes.map(s => `
+    <tr>
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><strong>${s.moto}</strong></td>
+      <td>${s.descricao.slice(0,40)}${s.descricao.length>40?'…':''}</td>
+      <td>${fmtBRL(s.valor)}</td>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── SERVIÇOS — LISTAGEM ──────────────────────────────────────
+
+function getServicosFiltrados() {
+  const texto  = (document.getElementById('filtro-texto')?.value || '').toLowerCase();
+  const inicio = document.getElementById('filtro-inicio')?.value;
+  const fim    = document.getElementById('filtro-fim')?.value;
+  const status = document.getElementById('filtro-status')?.value;
+  const pag    = document.getElementById('filtro-pagamento')?.value;
+
+  let lista = [...servicos];
+
+  if (texto) lista = lista.filter(s =>
+    s.moto.toLowerCase().includes(texto) ||
+    s.descricao.toLowerCase().includes(texto) ||
+    (s.cliente || '').toLowerCase().includes(texto) ||
+    (s.cpf || '').includes(texto));
+
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  if (status) lista = lista.filter(s => s.status === status);
+  if (pag)    lista = lista.filter(s => s.pagamento === pag);
+
+  // Ordenação
+  const ordem = document.getElementById('filtro-ordem')?.value || 'recente';
+  if (ordem === 'recente') lista.sort((a,b) => new Date(b.entrada)-new Date(a.entrada));
+  if (ordem === 'antigo')  lista.sort((a,b) => new Date(a.entrada)-new Date(b.entrada));
+  if (ordem === 'maior')   lista.sort((a,b) => b.valor - a.valor);
+  if (ordem === 'menor')   lista.sort((a,b) => a.valor - b.valor);
+
+  return lista;
+}
+
+function renderServicos() {
+  const lista = getServicosFiltrados();
+  const tbody = document.getElementById('tbody-servicos');
+
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🔧</div>Nenhum serviço encontrado.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(s => `
+    <tr style="${s.status==='pendente'?'background:rgba(239,68,68,.04)':''}">
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><strong>${s.moto}</strong></td>
+      <td title="${s.descricao}">${s.descricao.slice(0,35)}${s.descricao.length>35?'…':''}</td>
+      <td><strong>${fmtBRL(s.valor)}</strong></td>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${fmtDT(s.saida)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="abrirModal('${s.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="pedirExclusao('${s.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function aplicarFiltros() { renderServicos(); }
+
+function limparFiltros() {
+  ['filtro-texto','filtro-status','filtro-pagamento'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['filtro-inicio','filtro-fim'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('filtro-ordem').value = 'recente';
+  renderServicos();
+}
+
+function ordenarPor(campo) {
+  if (ordenacao.campo === campo) ordenacao.asc = !ordenacao.asc;
+  else { ordenacao.campo = campo; ordenacao.asc = true; }
+  const ordem = document.getElementById('filtro-ordem');
+  if (campo === 'valor') ordem.value = ordenacao.asc ? 'menor' : 'maior';
+  else if (campo === 'entrada') ordem.value = ordenacao.asc ? 'antigo' : 'recente';
+  renderServicos();
+}
+
+// ── MODAL — ADICIONAR / EDITAR ────────────────────────────────
+
+function abrirModal(id = null) {
+  editandoId = id;
+  document.getElementById('modal-titulo').textContent = id ? 'Editar Serviço' : 'Novo Serviço';
+
+  if (id) {
+    const s = servicos.find(x => x.id === id);
+    document.getElementById('f-cliente').value   = s.cliente || '';
+    document.getElementById('f-cpf').value       = s.cpf || '';
+    document.getElementById('f-moto').value      = s.moto;
+    document.getElementById('f-descricao').value = s.descricao;
+    document.getElementById('f-valor').value     = s.valor;
+    document.getElementById('f-pagamento').value = s.pagamento;
+    document.getElementById('f-entrada').value   = s.entrada;
+    document.getElementById('f-saida').value     = s.saida || '';
+    document.getElementById('f-status').value    = s.status;
+  } else {
+    // Limpa o formulário
+    ['f-cliente','f-cpf','f-moto','f-descricao','f-valor','f-saida'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-pagamento').value = '';
+    document.getElementById('f-status').value    = 'pendente';
+    // Preenche data de entrada com agora
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('f-entrada').value = now.toISOString().slice(0,16);
+  }
+
+  document.getElementById('overlay-servico').classList.add('open');
+  document.getElementById('f-moto').focus();
+}
+
+function fecharModal() {
+  document.getElementById('overlay-servico').classList.remove('open');
+  editandoId = null;
+}
+
+function salvarServico() {
+  const cliente   = document.getElementById('f-cliente').value.trim();
+  const cpf       = document.getElementById('f-cpf').value.trim();
+  const moto      = document.getElementById('f-moto').value.trim();
+  const descricao = document.getElementById('f-descricao').value.trim();
+  const valor     = parseFloat(document.getElementById('f-valor').value);
+  const pagamento = document.getElementById('f-pagamento').value;
+  const entrada   = document.getElementById('f-entrada').value;
+  const saida     = document.getElementById('f-saida').value;
+  const status    = document.getElementById('f-status').value;
+
+  // Validações
+  if (!moto)            return toast('Informe o modelo do veículo.', 'error');
+  if (!descricao)       return toast('Descreva o serviço realizado.', 'error');
+  if (!valor || valor<=0) return toast('Informe um valor válido.', 'error');
+  if (!pagamento)       return toast('Selecione a forma de pagamento.', 'error');
+  if (!entrada)         return toast('Informe a data/hora de entrada.', 'error');
+
+  if (editandoId) {
+    const idx = servicos.findIndex(s => s.id === editandoId);
+    servicos[idx] = { ...servicos[idx], cliente, cpf, moto, descricao, valor, pagamento, entrada, saida, status };
+    toast('Serviço atualizado com sucesso!');
+  } else {
+    servicos.push({ id: gerarId(), cliente, cpf, moto, descricao, valor, pagamento, entrada, saida, status });
+    toast('Serviço cadastrado com sucesso!');
+  }
+
+  salvar();
+  fecharModal();
+  renderServicos();
+  renderDashboard();
+}
+
+// ── EXCLUSÃO ─────────────────────────────────────────────────
+
+function pedirExclusao(id) {
+  excluindoId = id;
+  document.getElementById('overlay-confirma').classList.add('open');
+}
+
+function fecharConfirma() {
+  document.getElementById('overlay-confirma').classList.remove('open');
+  excluindoId = null;
+}
+
+function confirmarExclusao() {
+  servicos = servicos.filter(s => s.id !== excluindoId);
+  salvar();
+  fecharConfirma();
+  renderServicos();
+  renderDashboard();
+  toast('Serviço removido.', 'error');
+}
+
+// ── RELATÓRIOS ────────────────────────────────────────────────
+
+function filtrarMesAtual() {
+  const now  = new Date();
+  const ano  = now.getFullYear();
+  const mes  = String(now.getMonth() + 1).padStart(2, '0');
+  const ini  = `${ano}-${mes}-01`;
+  const fim  = `${ano}-${mes}-${String(new Date(ano, now.getMonth()+1, 0).getDate()).padStart(2,'0')}`;
+  document.getElementById('rel-inicio').value = ini;
+  document.getElementById('rel-fim').value    = fim;
+  atualizarRelatorio();
+}
+
+function atualizarRelatorio() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  lista.sort((a,b) => new Date(b.entrada)-new Date(a.entrada));
+
+  const total     = lista.reduce((s,x) => s + Number(x.valor), 0);
+  const pagos     = lista.filter(x => x.status==='pago').reduce((s,x) => s + Number(x.valor), 0);
+  const pendentes = lista.filter(x => x.status==='pendente').reduce((s,x) => s + Number(x.valor), 0);
+
+  document.getElementById('rel-resumo').innerHTML = `
+    <div class="report-item">
+      <div class="label">Total Faturado</div>
+      <div class="value" style="color:var(--accent)">${fmtBRL(total)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Serviços</div>
+      <div class="value" style="color:var(--blue)">${lista.length}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Recebido</div>
+      <div class="value" style="color:var(--green)">${fmtBRL(pagos)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">A Receber</div>
+      <div class="value" style="color:var(--red)">${fmtBRL(pendentes)}</div>
+    </div>
+  `;
+
+  // Por forma de pagamento
+  const formas = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+  lista.filter(x => x.status==='pago').forEach(x => { if (formas[x.pagamento] !== undefined) formas[x.pagamento] += Number(x.valor); });
+
+  const nomePag = { pix:'🔵 Pix', debito:'💳 Débito', credito:'💳 Crédito', dinheiro:'💵 Dinheiro' };
+  document.getElementById('rel-pagamentos').innerHTML = Object.entries(formas).map(([k,v]) => `
+    <div class="report-item">
+      <div class="label">${nomePag[k]}</div>
+      <div class="value">${fmtBRL(v)}</div>
+    </div>
+  `).join('');
+
+  // Tabela
+  const tbody = document.getElementById('tbody-relatorio');
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum registro no período.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lista.map(s => `
+    <tr>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${s.moto}</td>
+      <td>${s.descricao.slice(0,40)}${s.descricao.length>40?'…':''}</td>
+      <td>${fmtBRL(s.valor)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── FECHAMENTO MENSAL ─────────────────────────────────────────
+
+function atualizarFechamento() {
+  const mes = parseInt(document.getElementById('fech-mes').value);
+  const ano = parseInt(document.getElementById('fech-ano').value);
+  if (!mes || !ano) return;
+
+  const ini = new Date(ano, mes-1, 1);
+  const fim = new Date(ano, mes, 0, 23, 59, 59);
+
+  const lista = servicos
+    .filter(s => {
+      const d = new Date(s.entrada);
+      return d >= ini && d <= fim;
+    })
+    .sort((a,b) => new Date(a.entrada)-new Date(b.entrada));
+
+  const total     = lista.reduce((s,x) => s + Number(x.valor), 0);
+  const pagos     = lista.filter(x => x.status==='pago').reduce((s,x) => s + Number(x.valor), 0);
+  const pendentes = lista.filter(x => x.status==='pendente').reduce((s,x) => s + Number(x.valor), 0);
+  const ultimoDia = new Date(ano, mes, 0).getDate();
+
+  document.getElementById('fech-resumo').innerHTML = `
+    <div class="report-item">
+      <div class="label">Fechamento</div>
+      <div class="value" style="font-size:1rem">${String(ultimoDia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Total Faturado</div>
+      <div class="value" style="color:var(--accent)">${fmtBRL(total)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Serviços</div>
+      <div class="value" style="color:var(--blue)">${lista.length}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Recebido</div>
+      <div class="value" style="color:var(--green)">${fmtBRL(pagos)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">A Receber</div>
+      <div class="value" style="color:var(--red)">${fmtBRL(pendentes)}</div>
+    </div>
+  `;
+
+  const formas = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+  lista.filter(x => x.status==='pago').forEach(x => { if (formas[x.pagamento] !== undefined) formas[x.pagamento] += Number(x.valor); });
+  const nomePag = { pix:'🔵 Pix', debito:'💳 Débito', credito:'💳 Crédito', dinheiro:'💵 Dinheiro' };
+
+  document.getElementById('fech-pagamentos').innerHTML = Object.entries(formas).map(([k,v]) => `
+    <div class="report-item">
+      <div class="label">${nomePag[k]}</div>
+      <div class="value">${fmtBRL(v)}</div>
+    </div>
+  `).join('');
+
+  const tbody = document.getElementById('tbody-fechamento');
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum serviço neste mês.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lista.map(s => `
+    <tr>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${s.moto}</td>
+      <td>${s.descricao.slice(0,40)}${s.descricao.length>40?'…':''}</td>
+      <td>${fmtBRL(s.valor)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── EXPORTAÇÕES ───────────────────────────────────────────────
+
+/** Gera e faz download de arquivo CSV */
+function gerarCSV(lista, nomeArquivo) {
+  const header = ['ID','Cliente','CPF','Moto','Descrição','Valor','Entrada','Saída','Status','Pagamento'];
+  const linhas = lista.map(s => [
+    s.id,
+    `"${(s.cliente||'').replace(/"/g,'""')}"`,
+    `"${(s.cpf||'').replace(/"/g,'""')}"`,
+    `"${s.moto}"`,
+    `"${s.descricao.replace(/"/g,'""')}"`,
+    Number(s.valor).toFixed(2),
+    fmtDT(s.entrada),
+    fmtDT(s.saida),
+    s.status,
+    s.pagamento
+  ].join(';'));
+
+  const csv = '\uFEFF' + [header.join(';'), ...linhas].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = nomeArquivo;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Arquivo CSV exportado com sucesso!');
+}
+
+function exportarCSV() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  gerarCSV(lista, `valter-motos-relatorio-${Date.now()}.csv`);
+}
+
+function exportarFechamentoCSV() {
+  const mes = parseInt(document.getElementById('fech-mes').value);
+  const ano = parseInt(document.getElementById('fech-ano').value);
+  const ini = new Date(ano, mes-1, 1);
+  const fim = new Date(ano, mes, 0, 23, 59, 59);
+  const lista = servicos.filter(s => { const d = new Date(s.entrada); return d >= ini && d <= fim; });
+  gerarCSV(lista, `valter-motos-fechamento-${ano}-${String(mes).padStart(2,'0')}.csv`);
+}
+
+/** Exporta como XLSX via CSV (compatível com Excel) */
+function exportarXLSX() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+
+  const header = 'ID\tMoto\tDescrição\tValor\tEntrada\tSaída\tStatus\tPagamento\n';
+  const linhas = lista.map(s =>
+    [s.id, s.moto, s.descricao, Number(s.valor).toFixed(2), fmtDT(s.entrada), fmtDT(s.saida), s.status, s.pagamento].join('\t')
+  ).join('\n');
+
+  const blob = new Blob(['\uFEFF' + header + linhas], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `valter-motos-relatorio-${Date.now()}.xls`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Arquivo Excel exportado com sucesso!');
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────────
+
+function montarTextoRelatorio(lista, titulo) {
+  const total   = lista.reduce((s,x) => s + Number(x.valor), 0);
+  const pagos   = lista.filter(x => x.status==='pago').reduce((s,x) => s + Number(x.valor), 0);
+  const pend    = lista.filter(x => x.status==='pendente').reduce((s,x) => s + Number(x.valor), 0);
+  const formas  = { pix:0, debito:0, credito:0, dinheiro:0 };
+  lista.filter(x => x.status==='pago').forEach(x => { if (formas[x.pagamento]!==undefined) formas[x.pagamento] += Number(x.valor); });
+
+  let txt = `🏍️ *VALTER MOTOS*\n`;
+  txt += `📋 *${titulo}*\n`;
+  txt += `📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+  txt += `━━━━━━━━━━━━━━━━━━━━\n`;
+  txt += `💰 Total Faturado: *${fmtBRL(total)}*\n`;
+  txt += `✅ Recebido: *${fmtBRL(pagos)}*\n`;
+  txt += `⏳ A Receber: *${fmtBRL(pend)}*\n`;
+  txt += `🔧 Serviços: *${lista.length}*\n\n`;
+  txt += `━━━━ Formas de Pagamento ━━━━\n`;
+  txt += `🔵 Pix: ${fmtBRL(formas.pix)}\n`;
+  txt += `💳 Débito: ${fmtBRL(formas.debito)}\n`;
+  txt += `💳 Crédito: ${fmtBRL(formas.credito)}\n`;
+  txt += `💵 Dinheiro: ${fmtBRL(formas.dinheiro)}\n\n`;
+  txt += `━━━━━━ Detalhes ━━━━━━\n`;
+  lista.slice(0, 20).forEach(s => {
+    txt += `• ${fmtDT(s.entrada)} | ${s.moto} | ${fmtBRL(s.valor)} | ${s.status==='pago'?'✅':'⏳'}\n`;
+  });
+  if (lista.length > 20) txt += `_(+ ${lista.length-20} serviços)_\n`;
+  return txt;
+}
+
+function enviarWhatsApp() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  lista.sort((a,b) => new Date(b.entrada)-new Date(a.entrada));
+
+  const txt = montarTextoRelatorio(lista, 'Relatório de Serviços');
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
+function enviarFechamentoWhatsApp() {
+  const mes = parseInt(document.getElementById('fech-mes').value);
+  const ano = parseInt(document.getElementById('fech-ano').value);
+  const ini = new Date(ano, mes-1, 1);
+  const fim = new Date(ano, mes, 0, 23, 59, 59);
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const lista = servicos.filter(s => { const d = new Date(s.entrada); return d >= ini && d <= fim; });
+
+  const txt = montarTextoRelatorio(lista, `Fechamento de ${meses[mes-1]}/${ano}`);
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
+// ── MODAL IMPRESSÃO ──────────────────────────────────────────
+
+function abrirModalImpressao() {
+  const now = new Date();
+  document.getElementById('print-mes').value = now.getMonth() + 1;
+  document.getElementById('print-ano').value = now.getFullYear();
+  document.getElementById('overlay-impressao').classList.add('open');
+}
+
+function fecharModalImpressao() {
+  document.getElementById('overlay-impressao').classList.remove('open');
+}
+
+/**
+ * Gera o relatório contábil no formato de nota fiscal
+ * e dispara o diálogo de impressão do navegador.
+ */
+function executarImpressao() {
+  const mes    = parseInt(document.getElementById('print-mes').value);
+  const ano    = parseInt(document.getElementById('print-ano').value);
+  const meses  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  if (!mes || !ano) return toast('Selecione mês e ano.', 'error');
+
+  const ini  = new Date(ano, mes - 1, 1);
+  const fim  = new Date(ano, mes, 0, 23, 59, 59);
+  const lista = servicos
+    .filter(s => { const d = new Date(s.entrada); return d >= ini && d <= fim; })
+    .sort((a, b) => new Date(a.entrada) - new Date(b.entrada));
+
+  // Cálculos financeiros
+  const totalGeral  = lista.reduce((s, x) => s + Number(x.valor), 0);
+  const totalPago   = lista.filter(x => x.status === 'pago').reduce((s, x) => s + Number(x.valor), 0);
+  const totalPend   = lista.filter(x => x.status === 'pendente').reduce((s, x) => s + Number(x.valor), 0);
+  const qtdServicos = lista.length;
+  const ultimoDia   = new Date(ano, mes, 0).getDate();
+
+  // Totais por forma de pagamento (apenas pagos)
+  const formas = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+  lista.filter(x => x.status === 'pago').forEach(x => {
+    if (formas[x.pagamento] !== undefined) formas[x.pagamento] += Number(x.valor);
+  });
+
+  // Número do documento: AAAAMM
+  const numDoc = `${ano}${String(mes).padStart(2,'0')}`;
+  const hoje   = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const horaEmissao = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+
+  // Nomes das formas de pagamento
+  const nomePag = { pix: 'PIX', debito: 'Cartão Débito', credito: 'Cartão Crédito', dinheiro: 'Dinheiro' };
+
+  // ── Linhas da tabela de serviços ──
+  let linhasServicos = '';
+  if (!lista.length) {
+    linhasServicos = `<tr><td colspan="9" style="text-align:center;padding:12px;color:#777;font-style:italic">Nenhum serviço registrado neste período.</td></tr>`;
+  } else {
+    lista.forEach((s, i) => {
+      const entradaFmt = fmtDT(s.entrada);
+      const saidaFmt   = s.saida ? fmtDT(s.saida) : '—';
+      const statusTxt  = s.status === 'pago'
+        ? `<span class="nf-status-pago">PAGO</span>`
+        : `<span class="nf-status-pendente">PEND.</span>`;
+      const pagTxt = nomePag[s.pagamento] || s.pagamento;
+      const clienteTxt = s.cliente || '—';
+      const cpfTxt     = s.cpf     || '';
+      linhasServicos += `
+        <tr>
+          <td class="col-seq">${i + 1}</td>
+          <td class="col-cliente">${clienteTxt}${cpfTxt ? `<br><span style="font-size:7pt;color:#666">${cpfTxt}</span>` : ''}</td>
+          <td class="col-data">${entradaFmt}</td>
+          <td class="col-moto">${s.moto}</td>
+          <td class="col-desc">${s.descricao}</td>
+          <td class="col-saida">${saidaFmt}</td>
+          <td class="col-pag">${pagTxt}</td>
+          <td class="col-status">${statusTxt}</td>
+          <td class="col-valor">${fmtBRL(s.valor)}</td>
+        </tr>`;
+    });
+  }
+
+  // ── HTML do relatório contábil ──
+  const html = `
+  <div class="nf-page">
+
+    <!-- Cabeçalho -->
+    <div class="nf-header">
+      <div class="nf-empresa">
+        <div class="nf-empresa-nome">🏍️ Valter Motos</div>
+        <div class="nf-empresa-sub">Oficina Mecânica de Motocicletas</div>
+        <div class="nf-empresa-info">
+          Cariacica — Espírito Santo — Brasil<br>
+          Serviços de manutenção, reparo e revisão de motocicletas
+        </div>
+      </div>
+      <div class="nf-docbox">
+        <div class="nf-docbox-title">Relatório Contábil</div>
+        <div class="nf-docbox-num">Nº ${numDoc}</div>
+        <div class="nf-docbox-periodo">${meses[mes-1].toUpperCase()} / ${ano}</div>
+        <div class="nf-docbox-emissao">Emitido em: ${hoje} às ${horaEmissao}</div>
+        <div class="nf-docbox-emissao">Competência: 01/${String(mes).padStart(2,'0')}/${ano} a ${String(ultimoDia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}</div>
+      </div>
+    </div>
+
+    <!-- Faixa de tipo de documento -->
+    <div class="nf-tipo-doc">Demonstrativo de Receitas de Serviços — Uso Exclusivo Contabilidade</div>
+
+    <!-- Resumo financeiro -->
+    <div class="nf-section">
+      <div class="nf-section-title">I — Resumo Financeiro do Período</div>
+      <div class="nf-resumo-grid">
+        <div class="nf-resumo-item">
+          <div class="nf-resumo-label">Total Faturado (Bruto)</div>
+          <div class="nf-resumo-valor">${fmtBRL(totalGeral)}</div>
+        </div>
+        <div class="nf-resumo-item">
+          <div class="nf-resumo-label">Total Recebido</div>
+          <div class="nf-resumo-valor">${fmtBRL(totalPago)}</div>
+        </div>
+        <div class="nf-resumo-item">
+          <div class="nf-resumo-label">A Receber (Pendente)</div>
+          <div class="nf-resumo-valor">${fmtBRL(totalPend)}</div>
+        </div>
+        <div class="nf-resumo-item">
+          <div class="nf-resumo-label">Qtd. de Serviços</div>
+          <div class="nf-resumo-valor">${qtdServicos}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totais por forma de pagamento -->
+    <div class="nf-section">
+      <div class="nf-section-title">II — Receitas por Forma de Pagamento (Pagamentos Confirmados)</div>
+      <div class="nf-pagamentos-grid">
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">PIX</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.pix)}</div>
+        </div>
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">Cartão Débito</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.debito)}</div>
+        </div>
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">Cartão Crédito</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.credito)}</div>
+        </div>
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">Dinheiro (Espécie)</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.dinheiro)}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de serviços -->
+    <div class="nf-section">
+      <div class="nf-section-title">III — Relação Detalhada de Serviços Prestados</div>
+      <div style="padding:0">
+        <table class="nf-table">
+          <thead>
+            <tr>
+              <th class="col-seq">#</th>
+              <th class="col-cliente">Cliente / CPF</th>
+              <th class="col-data">Dt. Entrada</th>
+              <th class="col-moto">Veículo</th>
+              <th class="col-desc">Descrição do Serviço</th>
+              <th class="col-saida">Dt. Saída</th>
+              <th class="col-pag">Pagamento</th>
+              <th class="col-status">Status</th>
+              <th class="col-valor">Valor (R$)</th>
+            </tr>
+          </thead>
+          <tbody>${linhasServicos}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Totalizador -->
+    <div class="nf-totais">
+      <div class="nf-total-box">
+        <div class="nf-total-label">Total de Serviços</div>
+        <div class="nf-total-valor">${qtdServicos}</div>
+      </div>
+      <div class="nf-total-box">
+        <div class="nf-total-label">Total Recebido</div>
+        <div class="nf-total-valor">${fmtBRL(totalPago)}</div>
+      </div>
+      <div class="nf-total-box">
+        <div class="nf-total-label">A Receber</div>
+        <div class="nf-total-valor">${fmtBRL(totalPend)}</div>
+      </div>
+      <div class="nf-total-box nf-total-destaque">
+        <div class="nf-total-label" style="color:#ccc">TOTAL FATURADO BRUTO</div>
+        <div class="nf-total-valor">${fmtBRL(totalGeral)}</div>
+      </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="nf-footer">
+      <div class="nf-footer-obs">
+        <strong>Observações para Contabilidade:</strong><br>
+        • Atividade: Prestação de serviços mecânicos em motocicletas<br>
+        • Regime tributário: verificar junto ao contador<br>
+        • Período de competência: ${meses[mes-1]}/${ano}<br>
+        • Documento gerado pelo sistema interno Valter Motos
+      </div>
+      <div class="nf-footer-ass">
+        <div class="nf-footer-ass-line">
+          Valter Motos — Responsável<br>
+          ${hoje}
+        </div>
+      </div>
+    </div>
+
+    <!-- Aviso fiscal -->
+    <div class="nf-aviso-fiscal">
+      Este documento é um <strong>relatório contábil auxiliar</strong> emitido pelo sistema de gestão interno.
+      Não substitui Nota Fiscal de Serviço (NFS-e) ou documentos fiscais obrigatórios pela legislação tributária vigente.
+      Para apuração de tributos (ISS, IRPJ, CSLL, PIS, COFINS), consulte seu contador.
+    </div>
+
+  </div>`;
+
+  // Injeta o HTML no container de impressão
+  document.getElementById('relatorio-impressao').innerHTML = html;
+
+  // Fecha o modal e aciona a impressão
+  fecharModalImpressao();
+  setTimeout(() => window.print(), 150);
+}
+
+document.getElementById('overlay-impressao').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalImpressao();
+});
+
+// ── FECHAR MODAIS AO CLICAR FORA ─────────────────────────────
+
+document.getElementById('overlay-servico').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+document.getElementById('overlay-confirma').addEventListener('click', function(e) {
+  if (e.target === this) fecharConfirma();
+});
+
+// ── INICIALIZAÇÃO ─────────────────────────────────────────────
+
+(function init() {
+  // Configura mês/ano atual no fechamento
+  const now = new Date();
+  document.getElementById('fech-mes').value = now.getMonth() + 1;
+  document.getElementById('fech-ano').value = now.getFullYear();
+
+  renderDashboard();
+})();
+</script>
+</body>
+</html>
