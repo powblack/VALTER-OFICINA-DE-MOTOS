@@ -1,0 +1,3432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Report</title>
+<link rel="icon" href="icon.png" type="image/png">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  /* ===== RESET & VARIÁVEIS ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0e11;
+    --bg2:       #161820;
+    --bg3:       #1e2028;
+    --border:    #2a2d38;
+    --accent:    #73746f;
+    --accent2:   #fa3e25;
+    --green:     #22c55e;
+    --red:       #f83030;
+    --yellow:    #eab308;
+    --blue:      #3b82f6;
+    --text:      #e8e9ed;
+    --muted:     #8b8fa8;
+    --radius:    10px;
+    --shadow:    0 4px 24px rgba(0,0,0,.45);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -.5px;
+  }
+
+  .logo span { color: white; }
+  .logo-icon { font-size: 2.6rem; }
+
+  .header-actions { display: flex; gap: 8px; background-color: #3b82f6; border-radius: 7px;}
+  .header-actions:hover { transform: scale(1.2); transition: 0.5s ease; background-color: #3b82f6; }
+  .print-botao:hover { transform: scale(1.3); transition: 0.5s ease; background-color: rgb(25, 239, 25); border-radius: 7px; }
+
+  /* ===== NAVEGAÇÃO ===== */
+  nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 2px;
+    padding: 0 24px;
+    overflow-x: auto;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 14px 18px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+
+  .nav-btn:hover { color: white; background-color: #3b82f6; }
+  .nav-btn.active { color: white; border-bottom-color: #25529b; background-color: #3b82f6; border-radius:5px;}
+
+  /* ===== LAYOUT ===== */
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ===== DASHBOARD ===== */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .card.orange::before { background: var(--accent); }
+  .card.green::before  { background: var(--green); }
+  .card.red::before    { background: var(--red); }
+  .card.blue::before   { background: var(--blue); }
+
+  .card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+  .card-value { font-size: 1.8rem; font-weight: 700; }
+  .card-icon  { position: absolute; right: 16px; top: 16px; font-size: 1.8rem; opacity: .15; }
+
+  /* ===== SEÇÃO TÍTULO ===== */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .section-title { font-size: 1rem; font-weight: 700; }
+
+  /* ===== BOTÕES ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all .15s;
+  }
+
+  .btn-primary  { background: #3b82f6;  color: #fff; }
+  .btn-primary:hover  { background: rgb(25, 239, 25); transform: scale(1.2); transition: 0.5s ease;}
+  .btn-success  { background: var(--green);   color: #fff; }
+  .btn-success:hover  { filter: brightness(1.1); }
+  .btn-danger   { background: var(--red);     color: #fff; }
+  .btn-danger:hover   { filter: brightness(1.1); }
+  .btn-info     { background: var(--blue);    color: #fff; }
+  .btn-info:hover     { filter: brightness(1.1); }
+  .btn-outline  { background: transparent; color: var(--text);}
+  .btn-outline:hover  { color: white;}
+  .btn-ghost    { background: var(--bg3); color: var(--text); }
+  .btn-ghost:hover    { background: var(--border); }
+  .btn-sm { padding: 5px 10px; font-size: 10  px; }
+  .btn-whatsapp { background: #25D366; color: #fff; }
+  .btn-whatsapp:hover { background: #1ebe5d; }
+  .print-icon {size: 50px; }
+
+  /* ===== FILTROS ===== */
+  .filters {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+
+  input, select, textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color .2s;
+    outline: none;
+    text-transform: uppercase;
+  }
+
+  /* Mantém select e date/number sem uppercase */
+  select,
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="number"],
+  input[type="time"] { text-transform: none; }
+
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  select option { background: var(--bg3); }
+
+  /* ===== TABELA ===== */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow-x: auto;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr { background: var(--bg3); }
+
+  th {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  th:hover { color: var(--text); }
+
+  td {
+    padding: 11px 14px;
+    border-top: 1px solid var(--border);
+    vertical-align: middle;
+    font-size: 13px;
+  }
+
+  tbody tr:hover { background: rgba(255,255,255,.03); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .4px;
+  }
+
+  .badge-green  { background: rgba(34,197,94,.15); color: var(--green); }
+  .badge-red    { background: rgba(239,68,68,.15);  color: var(--red); }
+  .badge-yellow { background: rgba(234,179,8,.15);  color: var(--yellow); }
+  .badge-blue   { background: rgba(59,130,246,.15); color: var(--blue); }
+  .badge-orange { background: rgba(249,115,22,.15); color: var(--accent); }
+
+  .actions { display: flex; gap: 6px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+  /* ===== MODAL ===== */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .modal-title { font-size: 1.1rem; font-weight: 700; }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .form-grid { display: grid; gap: 16px; }
+  .form-grid-2 { grid-template-columns: 1fr 1fr; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea { width: 100%; }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ===== RELATÓRIO ===== */
+  .report-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .report-box h3 { font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 16px; }
+
+  .report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+
+  .report-item { text-align: center; padding: 14px; background: var(--bg3); border-radius: 8px; }
+  .report-item .label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .report-item .value { font-size: 1.3rem; font-weight: 700; }
+
+  .report-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+
+  /* ===== NOTIFICAÇÃO TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    transform: translateY(60px);
+    opacity: 0;
+    transition: all .3s;
+    z-index: 999;
+  }
+
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-left-color: var(--green); }
+  #toast.error   { border-left-color: var(--red); }
+
+  /* ===== MODAL IMPRESSÃO ===== */
+  .print-modal-body { display: flex; flex-direction: column; gap: 16px; }
+  .print-select-row { display: flex; gap: 12px; }
+  .print-select-row .form-group { flex: 1; }
+
+  /* ===== RELATÓRIO CONTÁBIL (visível só na impressão) ===== */
+  #relatorio-impressao { display: none; }
+
+  /* ===== IMPRESSÃO ===== */
+  @media print {
+    /* Oculta tudo da interface */
+    header, nav, main, .filters, .actions, .report-actions,
+    .header-actions, #toast, .overlay, #relatorio-impressao ~ * { display: none !important; }
+
+    body {
+      background: #fff !important;
+      color: #000 !important;
+      font-family: 'Arial', sans-serif;
+      font-size: 10pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Mostra apenas o relatório contábil */
+    #relatorio-impressao { display: block !important; }
+
+    /* ── Estrutura do documento ── */
+    .nf-page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 14mm 16mm 14mm 16mm;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    /* ── Cabeçalho nota fiscal ── */
+    .nf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border: 2px solid #000;
+      margin-bottom: 0;
+    }
+
+    .nf-empresa {
+      flex: 1;
+      padding: 10px 14px;
+      border-right: 2px solid #000;
+    }
+
+    .nf-empresa-nome {
+      font-size: 16pt;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .nf-empresa-sub {
+      font-size: 8pt;
+      color: #444;
+      margin-top: 2px;
+    }
+
+    .nf-empresa-info {
+      font-size: 8pt;
+      margin-top: 8px;
+      line-height: 1.7;
+      color: #222;
+    }
+
+    .nf-docbox {
+      width: 62mm;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .nf-docbox-title {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #555;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .nf-docbox-num {
+      font-size: 20pt;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .nf-docbox-periodo {
+      font-size: 8pt;
+      margin-top: 6px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .nf-docbox-emissao {
+      font-size: 7.5pt;
+      color: #555;
+      margin-top: 3px;
+    }
+
+    /* ── Linha de identificação do documento ── */
+    .nf-tipo-doc {
+      background: #000;
+      color: #fff;
+      text-align: center;
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 0;
+      margin-bottom: 0;
+    }
+
+    /* ── Seção de dados ── */
+    .nf-section {
+      border: 1px solid #47464656;
+      border-top: none;
+      margin-bottom: 0;
+    }
+
+    .nf-section-title {
+      background: #000;
+      color: #fff;
+      font-size: 7.5pt;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+    }
+
+    .nf-section-body {
+      padding: 8px 10px;
+    }
+
+    /* ── Resumo financeiro ── */
+    .nf-resumo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-top: 1px solid #ddd;
+    }
+
+    .nf-resumo-item {
+      padding: 6px 10px;
+      border-right: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .nf-resumo-item:last-child { border-right: none; }
+
+    .nf-resumo-label {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+
+    .nf-resumo-valor {
+      font-size: 11pt;
+      font-weight: 900;
+    }
+
+    /* ── Totais por pagamento ── */
+    .nf-pagamentos-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid #ddd;
+    }
+
+    .nf-pag-item {
+      padding: 6px 10px;
+      border-right: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .nf-pag-item:last-child { border-right: none; }
+    .nf-pag-label { font-size: 7pt; text-transform: uppercase; letter-spacing: .8px; color: #666; margin-bottom: 2px; }
+    .nf-pag-valor { font-size: 9.5pt; font-weight: 700; }
+
+    /* ── Tabela de serviços ── */
+    .nf-table {
+      width: 100%;  
+      border-collapse: collapse;
+      font-size: 8pt;
+      margin-top: 0;
+    }
+
+    .nf-table thead tr {
+      background: #3f3e3e;
+      color: #fff;
+    }
+
+    .nf-table th {
+      padding: 2px 3px;
+      text-align: left;
+      font-size: 7pt;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      border: none;
+    }
+
+    .nf-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: top;
+      line-height: 1;
+    }
+
+    .nf-table tbody tr:nth-child(even) { background: #f9f9f9; }
+    .nf-table tbody tr:last-child td { border-bottom: 2px solid #000; }
+
+    .nf-table .col-seq     { width: 20px; text-align: center; color: #777; }
+    .nf-table .col-cliente { width: 80px; }
+    .nf-table .col-data    { width: 60px; }
+    .nf-table .col-moto    { width: 85px; font-weight: 600; }
+    .nf-table .col-desc    { max-width: 80px; display: none; } 
+    .nf-table .col-saida   { width: 60px; }
+    .nf-table .col-pag     { width: 52px; }
+    .nf-table .col-status  { width: 40px; text-align: center; }
+    .nf-table .col-valor   { width: 55px; text-align: right; font-weight: 700; }
+
+    .nf-status-pago     { font-weight: 700; color: #000; }
+    .nf-status-pendente { font-weight: 700; color: #777; font-style: italic; }
+
+    /* ── Totalizador final ── */
+    .nf-totais {
+      border: 2px solid #000;
+      border-top: none;
+      display: flex;
+      justify-content: flex-end;
+      align-items: stretch;
+    }
+
+    .nf-total-box {
+      padding: 8px 16px;
+      text-align: right;
+      border-left: 1px solid #ccc;
+    }
+
+    .nf-total-box:first-child { border-left: none; }
+
+    .nf-total-label {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #555;
+      margin-bottom: 1px;
+    }
+
+    .nf-total-valor {
+      font-size: 12pt;
+      font-weight: 900;
+    }
+
+    .nf-total-destaque {
+      background: #000;
+      color: #fff;
+      padding: 8px 16px;
+    }
+
+    /* ── Rodapé ── */
+    .nf-footer {
+      border: 1px solid #000;
+      border-top: none;
+      padding: 7px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 7.5pt;
+      color: #444;
+    }
+
+    .nf-footer-obs { flex: 1; }
+    .nf-footer-ass { text-align: center; width: 60mm; }
+    .nf-footer-ass-line { border-top: 1px solid #000; padding-top: 3px; margin-top: 16px; font-size: 7pt; }
+
+    .nf-aviso-fiscal {
+      margin-top: 6px;
+      padding: 5px 10px;
+      border: 1px dashed #aaa;
+      font-size: 7pt;
+      color: #666;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── Controle de página ── */
+    .nf-page-break { page-break-before: always; }
+    @page { margin: 0; size: A4; }
+  }
+
+  /* ===== CUPOM FISCAL — RECIBO DE SERVIÇO ===== */
+  #recibo-termico { display: none; }
+
+  @media print {
+    body.imprimindo-recibo header,
+    body.imprimindo-recibo nav,
+    body.imprimindo-recibo main,
+    body.imprimindo-recibo #toast,
+    body.imprimindo-recibo .overlay,
+    body.imprimindo-recibo #relatorio-impressao { display: none !important; }
+    body.imprimindo-recibo #recibo-termico { display: block !important; }
+    body:not(.imprimindo-recibo) #recibo-termico { display: none !important; }
+    body.imprimindo-recibo { background:#fff!important; color:#000!important; margin:0; padding:0; }
+    @page { size: 80mm auto; margin: 0; }
+  }
+
+  /* ── Wrapper ── */
+  .cupom-wrap {
+    width: 80mm;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8pt;
+    color: #000;
+    background: #fff;
+    margin: 0 auto;
+    padding: 4mm 3mm 6mm;
+    box-sizing: border-box;
+  }
+  .cupom-wrap * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Cabeçalho ── */
+  .cup-header {
+    text-align: center;
+    padding-bottom: 6px;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #000;
+  }
+  .cup-nome   { font-size: 12pt; font-weight: 900; text-transform: uppercase; line-height: 1.1; letter-spacing: 0.5px; }
+  .cup-sub    { font-size: 7pt; margin-top: 2px; }
+  .cup-info   { font-size: 7pt; margin-top: 4px; line-height: 1.7; border-top: 1px dashed #000; padding-top: 3px; margin-top: 4px; }
+
+  /* ── Título do documento ── */
+  .cup-titulo {
+    text-align: center;
+    font-size: 8pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 3px 0;
+    border-bottom: 1px dashed #000;
+    margin-bottom: 5px;
+  }
+
+  /* ── Número / via ── */
+  .cup-numvia {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    margin-bottom: 5px;
+    border-bottom: 1px dashed #000;
+    padding-bottom: 4px;
+  }
+  .cup-num  { font-weight: 700; }
+  .cup-via  { font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── Label de seção ── */
+  .cup-secao {
+    font-size: 7pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+    background: #000;
+    color: #fff;
+    padding: 2px 0;
+    margin: 5px 0 3px;
+  }
+
+  /* ── Linha de dado ── */
+  .cup-campo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 7.5pt;
+    padding: 2px 0;
+    border-bottom: 1px dotted #ccc;
+    line-height: 1.5;
+  }
+  .cup-campo:last-child { border-bottom: none; }
+  .cup-label { color: #444; font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; padding-right: 4px; flex-shrink: 0; }
+  .cup-valor { font-weight: 700; text-align: right; word-break: break-word; max-width: 55mm; }
+
+  /* ── Descrição do serviço ── */
+  .cup-desc {
+    font-size: 8pt;
+    font-weight: 700;
+    line-height: 1.6;
+    padding: 4px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-bottom: 1px dotted #ccc;
+  }
+
+  /* ── Separador ── */
+  .cup-sep { border: none; border-top: 1px dashed #000; margin: 5px 0; }
+  .cup-sep-s { border: none; border-top: 2px solid #000; margin: 5px 0; }
+
+  /* ── Total ── */
+  .cup-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    margin: 5px 0;
+  }
+  .cup-total-label { font-size: 8.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cup-total-valor { font-size: 14pt; font-weight: 900; }
+
+  /* ── Rodapé ── */
+  .cup-rodape {
+    font-size: 7pt;
+    text-align: center;
+    line-height: 1.7;
+    margin-top: 4px;
+    color: #333;
+  }
+
+  /* ── Assinatura ── */
+  .cup-ass {
+    margin-top: 16px;
+    border-top: 1px solid #000;
+    padding-top: 3px;
+    text-align: center;
+    font-size: 7pt;
+  }
+
+  /* ── Aviso ── */
+  .cup-aviso {
+    font-size: 6.5pt;
+    text-align: center;
+    color: #666;
+    border-top: 1px dashed #000;
+    padding-top: 4px;
+    margin-top: 5px;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* ── Corte ── */
+  .cup-corte {
+    text-align: center;
+    font-size: 8pt;
+    letter-spacing: 2px;
+    color: #666;
+    margin: 10px 0 6px;
+  }
+
+  @media print {
+    .cupom-wrap { width: 74mm; padding: 3mm 2mm 5mm; }
+  }
+
+
+  /* ===== PÁGINA DE CONFIGURAÇÃO DO RECIBO ===== */
+  .config-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .config-layout { grid-template-columns: 1fr; }
+  }
+
+  .config-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .config-section {
+    padding: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .config-section:last-child { border-bottom: none; }
+
+  .config-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .config-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .config-row:last-child { margin-bottom: 0; }
+
+  .config-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+  }
+
+  .config-row input,
+  .config-row select,
+  .config-row textarea { width: 100%; }
+
+  .config-row textarea { min-height: 60px; }
+
+  .config-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .config-toggle-row:last-child { border-bottom: none; }
+
+  .config-toggle-label { font-size: 13px; color: var(--text); }
+  .config-toggle-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  .toggle {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .2s;
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  .preview-sticky { position: sticky; top: 80px; }
+
+  .preview-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .preview-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .preview-inner {
+    background: #1a1a1a;
+    padding: 16px;
+    min-height: 400px;
+    display: flex;
+    justify-content: center;
+    overflow-y: auto;
+    max-height: 70vh;
+  }
+
+  .preview-papel {
+    background: #fff;
+    color: #000;
+    width: 200px;
+    padding: 5px 4px 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 5.5pt;
+    box-shadow: 0 4px 20px rgba(0,0,0,.6);
+    border-radius: 2px;
+    line-height: 1.4;
+    height: fit-content;
+  }
+
+  .preview-papel * { box-sizing: border-box; margin:0; padding:0; }
+
+  /* NFC-e preview classes */
+  .prev-header    { text-align:center; padding-bottom:4px; border-bottom:1px dashed #000; margin-bottom:3px; }
+  .prev-razao     { font-size:7.5pt; font-weight:900; text-transform:uppercase; line-height:1.1; }
+  .prev-fantasia  { font-size:5pt; }
+  .prev-end       { font-size:5pt; margin-top:2px; line-height:1.5; }
+  .prev-titulo    { text-align:center; font-size:5.5pt; font-weight:900; letter-spacing:1px; text-transform:uppercase; border-top:1px solid #000; border-bottom:1px solid #000; padding:2px 0; margin:3px 0; }
+  .prev-numvia    { display:flex; justify-content:space-between; font-size:4.5pt; padding-bottom:3px; border-bottom:1px dashed #000; margin-bottom:3px; }
+  .prev-secao     { text-align:center; font-size:5pt; font-weight:900; text-transform:uppercase; letter-spacing:.8px; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:1.5px 0; margin:3px 0 2px; }
+  .prev-itens-hdr { display:grid; grid-template-columns:1fr 20px 36px 36px; font-size:4.5pt; font-weight:700; text-transform:uppercase; border-bottom:1px solid #000; padding-bottom:1px; margin-bottom:2px; }
+  .prev-item      { display:grid; grid-template-columns:1fr 20px 36px 36px; font-size:4.5pt; padding:1px 0; border-bottom:1px dotted #ccc; line-height:1.4; }
+  .prev-item-desc { grid-column:1/-1; font-size:5.5pt; font-weight:700; padding-bottom:1px; }
+  .prev-sep       { border:none; border-top:1px dashed #000; margin:3px 0; }
+  .prev-sep-s     { border:none; border-top:1px solid #000; margin:3px 0; }
+  .prev-tot-linha { display:flex; justify-content:space-between; font-size:5pt; padding:1px 0; border-bottom:1px dotted #ddd; }
+  .prev-tot-linha:last-child { border-bottom:none; }
+  .prev-tot-val   { font-weight:700; }
+  .prev-total     { display:flex; justify-content:space-between; align-items:center; border-top:1.5px solid #000; border-bottom:1.5px solid #000; padding:3px 0; margin:3px 0; }
+  .prev-total-lbl { font-size:5.5pt; font-weight:900; text-transform:uppercase; }
+  .prev-total-num { font-size:9.5pt; font-weight:900; }
+  .prev-cons      { font-size:4.5pt; line-height:1.6; }
+  .prev-chave     { border:1px solid #000; padding:2px 3px; margin:3px 0; }
+  .prev-chave-ttl { font-size:4pt; font-weight:700; text-transform:uppercase; text-align:center; margin-bottom:2px; }
+  .prev-chave-num { font-size:4pt; letter-spacing:.8px; word-break:break-all; color:#444; text-align:center; line-height:1.6; }
+  .prev-qr        { text-align:center; margin:3px 0 2px; }
+  .prev-qr-box    { display:inline-block; width:22mm; height:22mm; border:1px solid #000; background: repeating-conic-gradient(#000 0% 25%,#fff 0% 50%) 0 0/4px 4px; opacity:.15; }
+  .prev-aviso     { font-size:4pt; text-align:center; color:#666; border-top:1px dashed #000; padding-top:3px; margin-top:3px; line-height:1.5; }
+  .prev-corte     { text-align:center; font-size:5.5pt; letter-spacing:1px; margin:5px 0 3px; color:#999; }
+
+  .config-actions {
+    display: flex;
+    gap: 10px;
+    padding: 16px 18px;
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .config-panel-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .form-grid-2 { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    .filters { gap: 8px; }
+    td, th { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-icon material-icons">sticky_note_2</span>
+    <div>Sistema de Relatórios</div>
+  </div>
+  <div class="header-actions print-botao">
+    <button class="btn btn-outline btn-sm" onclick="abrirModalImpressao()">
+      <span class="material-icons">print</span>
+      Imprimir
+    </button>
+  </div>
+</header>
+
+<!-- NAVEGAÇÃO -->
+<nav>
+  <button class="nav-btn active" onclick="showPage('dashboard', this)">📊 Dashboard</button>
+  <button class="nav-btn" onclick="showPage('servicos', this)">🔧 Serviços</button>
+  <button class="nav-btn" onclick="showPage('motos', this)">🏍️ Motos</button>
+  <button class="nav-btn" onclick="showPage('relatorio', this)">📋 Relatórios</button>
+  <button class="nav-btn" onclick="showPage('fechamento', this)">💰 Fechamento</button>
+  <button class="nav-btn" onclick="showPage('config', this)">⚙️ Recibo</button>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="page-dashboard" class="page active">
+    <div class="dashboard-grid" id="dashboard-cards"></div>
+
+    <div class="section-header">
+      <span class="section-title">⚡ Serviços Recentes</span>
+    </div>
+    <div class="table-wrap">
+      <table id="table-recentes">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Moto</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Entrada</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-recentes"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== SERVIÇOS ===== -->
+  <div id="page-servicos" class="page">
+    <div class="section-header">
+      <span class="section-title">🔧 Gerenciar Serviços</span>
+      <button class="btn btn-primary" onclick="abrirModal()">➕ Novo Serviço</button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Buscar</label>
+        <input type="text" id="filtro-texto" placeholder="Moto, serviço ou cliente..." oninput="aplicarFiltros()">
+      </div>
+      <div class="filter-group">
+        <label>Data Início</label>
+        <input type="date" id="filtro-inicio" onchange="aplicarFiltros()">
+      </div>
+      <div class="filter-group">
+        <label>Data Fim</label>
+        <input type="date" id="filtro-fim" onchange="aplicarFiltros()">
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="filtro-status" onchange="aplicarFiltros()">
+          <option value="">Todos</option>
+          <option value="pago">Pago</option>
+          <option value="pendente">Pendente</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Pagamento</label>
+        <select id="filtro-pagamento" onchange="aplicarFiltros()">
+          <option value="">Todos</option>
+          <option value="pix">Pix</option>
+          <option value="debito">Débito</option>
+          <option value="credito">Crédito</option>
+          <option value="dinheiro">Dinheiro</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ordenar</label>
+        <select id="filtro-ordem" onchange="aplicarFiltros()">
+          <option value="recente">Mais Recente</option>
+          <option value="antigo">Mais Antigo</option>
+          <option value="maior">Maior Valor</option>
+          <option value="menor">Menor Valor</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="limparFiltros()">🗑️ Limpar</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="ordenarPor('cliente')">Cliente ↕</th>
+            <th onclick="ordenarPor('moto')">Moto ↕</th>
+            <th onclick="ordenarPor('descricao')">Serviço ↕</th>
+            <th onclick="ordenarPor('valor')">Valor ↕</th>
+            <th onclick="ordenarPor('entrada')">Entrada ↕</th>
+            <th>Saída</th>
+            <th onclick="ordenarPor('status')">Status ↕</th>
+            <th onclick="ordenarPor('pagamento')">Pagamento ↕</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-servicos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== RELATÓRIOS ===== -->
+  <div id="page-relatorio" class="page">
+    <div class="section-header">
+      <span class="section-title">📋 Relatórios</span>
+    </div>
+
+    <!-- Filtro de período -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Período Início</label>
+        <input type="date" id="rel-inicio" onchange="atualizarRelatorio()">
+      </div>
+      <div class="filter-group">
+        <label>Período Fim</label>
+        <input type="date" id="rel-fim" onchange="atualizarRelatorio()">
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="filtrarMesAtual()">📅 Mês Atual</button>
+    </div>
+
+    <!-- Resumo -->
+    <div class="report-box">
+      <h3>Resumo Geral</h3>
+      <div class="report-grid" id="rel-resumo"></div>
+    </div>
+
+    <!-- Por forma de pagamento -->
+    <div class="report-box">
+      <h3>Por Forma de Pagamento</h3>
+      <div class="report-grid" id="rel-pagamentos"></div>
+    </div>
+
+    <!-- Ações de exportação -->
+    <div class="report-actions">
+      <button class="btn btn-success" onclick="exportarCSV()">📥 Exportar CSV</button>
+      <button class="btn btn-info" onclick="exportarXLSX()">📊 Exportar Excel</button>
+      <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">💬 Enviar WhatsApp</button>
+      <button class="btn btn-outline" onclick="abrirModalImpressao()">🖨️ Imprimir Relatório</button>
+    </div>
+
+    <!-- Tabela detalhada -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Cliente</th>
+            <th>Moto</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-relatorio"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== FECHAMENTO ===== -->
+  <div id="page-fechamento" class="page">
+    <div class="section-header">
+      <span class="section-title">💰 Fechamento Mensal</span>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>Mês</label>
+        <select id="fech-mes" onchange="atualizarFechamento()">
+          <option value="1">Janeiro</option>
+          <option value="2">Fevereiro</option>
+          <option value="3">Março</option>
+          <option value="4">Abril</option>
+          <option value="5">Maio</option>
+          <option value="6">Junho</option>
+          <option value="7">Julho</option>
+          <option value="8">Agosto</option>
+          <option value="9">Setembro</option>
+          <option value="10">Outubro</option>
+          <option value="11">Novembro</option>
+          <option value="12">Dezembro</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ano</label>
+        <input type="number" id="fech-ano" min="2020" max="2099" style="width:100px" onchange="atualizarFechamento()">
+      </div>
+    </div>
+
+    <div class="report-box">
+      <h3>Resumo do Fechamento</h3>
+      <div class="report-grid" id="fech-resumo"></div>
+    </div>
+
+    <div class="report-box">
+      <h3>Totais por Forma de Pagamento</h3>
+      <div class="report-grid" id="fech-pagamentos"></div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Serviços do Mês</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-success btn-sm" onclick="exportarFechamentoCSV()">📥 Exportar CSV</button>
+        <button class="btn btn-whatsapp btn-sm" onclick="enviarFechamentoWhatsApp()">💬 WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Cliente</th>
+            <th>Moto</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-fechamento"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== CONFIGURAÇÃO DO RECIBO ===== -->
+  <div id="page-config" class="page">
+    <div class="section-header">
+      <span class="section-title">⚙️ Configuração do Recibo Térmico</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="restaurarPadrao()">↩️ Restaurar Padrão</button>
+        <button class="btn btn-primary" onclick="salvarConfig()">💾 Salvar Configurações</button>
+      </div>
+    </div>
+
+    <div class="config-layout">
+
+      <!-- Painel de edição -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Dados da empresa -->
+        <div class="config-panel">
+          <div class="config-panel-header">🏪 Dados da Empresa</div>
+          <div class="config-section">
+            <div class="config-row">
+              <label class="config-label">Nome da Empresa</label>
+              <input type="text" id="cfg-nome" oninput="atualizarPreview()" placeholder="Ex: Valter Motos">
+            </div>
+            <div class="config-row">
+              <label class="config-label">Slogan / Subtítulo</label>
+              <input type="text" id="cfg-sub" oninput="atualizarPreview()" placeholder="Ex: Oficina Mecânica de Motocicletas">
+            </div>
+            <div class="config-row">
+              <label class="config-label">Endereço / Cidade</label>
+              <input type="text" id="cfg-end1" oninput="atualizarPreview()" placeholder="Ex: Cariacica — Espírito Santo">
+            </div>
+            <div class="config-row">
+              <label class="config-label">Telefone / WhatsApp</label>
+              <input type="text" id="cfg-tel" oninput="atualizarPreview()" placeholder="Ex: (27) 99999-9999">
+            </div>
+            <div class="config-row">
+              <label class="config-label">CNPJ / CPF (opcional)</label>
+              <input type="text" id="cfg-cnpj" oninput="atualizarPreview()" placeholder="Ex: CNPJ: 00.000.000/0001-00">
+            </div>
+          </div>
+        </div>
+
+        <!-- Textos do recibo -->
+        <div class="config-panel">
+          <div class="config-panel-header">📝 Textos do Recibo</div>
+          <div class="config-section">
+            <div class="config-row">
+              <label class="config-label">Título do Documento</label>
+              <input type="text" id="cfg-titulo" oninput="atualizarPreview()" placeholder="Ex: Recibo de Serviço">
+            </div>
+            <div class="config-row">
+              <label class="config-label">Texto da Assinatura</label>
+              <input type="text" id="cfg-ass" oninput="atualizarPreview()" placeholder="Ex: Valter Motos — Responsável">
+            </div>
+            <div class="config-row">
+              <label class="config-label">Mensagem de Rodapé</label>
+              <textarea id="cfg-rodape" oninput="atualizarPreview()" placeholder="Ex: Obrigado pela preferência! Volte sempre."></textarea>
+            </div>
+            <div class="config-row">
+              <label class="config-label">Aviso Legal (linha inferior)</label>
+              <textarea id="cfg-aviso" oninput="atualizarPreview()" placeholder="Ex: Este documento não substitui Nota Fiscal."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos visíveis -->
+        <div class="config-panel">
+          <div class="config-panel-header">👁️ Campos Visíveis no Recibo</div>
+          <div class="config-section">
+            <div class="config-toggle-row">
+              <div>
+                <div class="config-toggle-label">Nome do Cliente</div>
+                <div class="config-toggle-desc">Exibir nome quando disponível</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cfg-show-cliente" onchange="atualizarPreview()" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="config-toggle-row">
+              <div>
+                <div class="config-toggle-label">CPF do Cliente</div>
+                <div class="config-toggle-desc">Exibir CPF quando disponível</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cfg-show-cpf" onchange="atualizarPreview()" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="config-toggle-row">
+              <div>
+                <div class="config-toggle-label">Data e Hora de Entrada</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cfg-show-entrada" onchange="atualizarPreview()" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="config-toggle-row">
+              <div>
+                <div class="config-toggle-label">Data e Hora de Saída</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cfg-show-saida" onchange="atualizarPreview()" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="config-toggle-row">
+              <div>
+                <div class="config-toggle-label">Forma de Pagamento</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cfg-show-pag" onchange="atualizarPreview()" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="config-toggle-row">
+              <div>
+                <div class="config-toggle-label">Linha de Assinatura</div>
+                <div class="config-toggle-desc">Espaço para assinatura manual</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cfg-show-ass" onchange="atualizarPreview()" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="config-toggle-row">
+              <div>
+                <div class="config-toggle-label">Imprimir 2ª Via (loja)</div>
+                <div class="config-toggle-desc">Imprime cópia separada para o estabelecimento</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="cfg-show-2via" onchange="atualizarPreview()" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formato -->
+        <div class="config-panel">
+          <div class="config-panel-header">🖨️ Formato de Impressão</div>
+          <div class="config-section">
+            <div class="config-row">
+              <label class="config-label">Largura do Papel</label>
+              <select id="cfg-largura" onchange="atualizarPreview()">
+                <option value="58mm">58mm (pequena)</option>
+                <option value="80mm" selected>80mm (padrão)</option>
+              </select>
+            </div>
+            <div class="config-row">
+              <label class="config-label">Tamanho da Fonte Base</label>
+              <select id="cfg-fonte" onchange="atualizarPreview()">
+                <option value="9pt">9pt — Pequena</option>
+                <option value="10pt" selected>10pt — Normal</option>
+                <option value="11pt">11pt — Grande</option>
+                <option value="12pt">12pt — Muito Grande</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Preview ao vivo -->
+      <div class="preview-sticky">
+        <div class="preview-panel">
+          <div class="preview-header">
+            <span>👁️ Preview ao Vivo</span>
+            <span style="font-size:10px;font-weight:400;color:var(--muted)">1ª via</span>
+          </div>
+          <div class="preview-inner">
+            <div class="preview-papel" id="preview-recibo">
+              <!-- Gerado dinamicamente -->
+            </div>
+          </div>
+          <div class="config-actions">
+            <button class="btn btn-primary" style="flex:1" onclick="salvarConfig()">💾 Salvar</button>
+            <button class="btn btn-info btn-sm" onclick="testarImpressao()">🖨️ Testar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MOTOS ===== -->
+  <div id="page-motos" class="page">
+    <div class="section-header">
+      <span class="section-title">🏍️ Cadastro de Motos</span>
+      <button class="btn btn-primary" onclick="abrirModalMoto()">➕ Nova Moto</button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Buscar</label>
+        <input type="text" id="moto-filtro-texto" placeholder="MODELO, PLACA, PROPRIETÁRIO..." oninput="renderMotos()">
+      </div>
+      <div class="filter-group">
+        <label>Marca</label>
+        <select id="moto-filtro-marca" onchange="renderMotos()">
+          <option value="">TODAS</option>
+          <option>HONDA</option>
+          <option>YAMAHA</option>
+          <option>SUZUKI</option>
+          <option>KAWASAKI</option>
+          <option>TRIUMPH</option>
+          <option>BMW</option>
+          <option>HARLEY-DAVIDSON</option>
+          <option>DUCATI</option>
+          <option>ROYAL ENFIELD</option>
+          <option>OUTRA</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ordenar</label>
+        <select id="moto-filtro-ordem" onchange="renderMotos()">
+          <option value="recente">MAIS RECENTE</option>
+          <option value="modelo">MODELO A-Z</option>
+          <option value="ano">ANO (MAIS NOVO)</option>
+          <option value="proprietario">PROPRIETÁRIO A-Z</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="limparFiltrosMotos()">🗑️ LIMPAR</button>
+    </div>
+
+    <!-- Cards de resumo -->
+    <div class="dashboard-grid" id="motos-cards" style="margin-bottom:20px"></div>
+
+    <!-- Tabela -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>PROPRIETÁRIO</th>
+            <th>MARCA / MODELO</th>
+            <th>PLACA</th>
+            <th>ANO FAB.</th>
+            <th>COR</th>
+            <th>CILINDRADA</th>
+            <th>SERVIÇOS</th>
+            <th>AÇÕES</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-motos"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL MOTO -->
+<div class="overlay" id="overlay-moto">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-moto-titulo">NOVA MOTO</span>
+      <button class="modal-close" onclick="fecharModalMoto()">✕</button>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Proprietário -->
+      <div style="background:var(--bg3);border-radius:8px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">👤 Proprietário</div>
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Nome do Proprietário</label>
+            <input type="text" id="fm-proprietario" placeholder="NOME COMPLETO">
+          </div>
+          <div class="form-group">
+            <label class="form-label">CPF / CNPJ</label>
+            <input type="text" id="fm-cpf" placeholder="000.000.000-00" maxlength="18" oninput="mascaraCPF(this)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefone</label>
+            <input type="text" id="fm-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTelefone(this)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="text" id="fm-email" placeholder="EMAIL@EXEMPLO.COM">
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados do veículo -->
+      <div style="background:var(--bg3);border-radius:8px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">🏍️ Dados do Veículo</div>
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Marca *</label>
+            <select id="fm-marca" required onchange="atualizarModelosPorMarca()">
+              <option value="">SELECIONE...</option>
+              <option>HONDA</option>
+              <option>YAMAHA</option>
+              <option>SUZUKI</option>
+              <option>KAWASAKI</option>
+              <option>TRIUMPH</option>
+              <option>BMW</option>
+              <option>HARLEY-DAVIDSON</option>
+              <option>DUCATI</option>
+              <option>ROYAL ENFIELD</option>
+              <option>OUTRA</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Modelo *</label>
+            <input type="text" id="fm-modelo" placeholder="EX: CG 160, FACTOR 150..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ano de Fabricação *</label>
+            <input type="number" id="fm-ano-fab" min="1950" max="2099" placeholder="2024" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cilindrada (CC)</label>
+            <input type="number" id="fm-cilindrada" min="50" max="9999" placeholder="160">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cor Principal *</label>
+            <input type="text" id="fm-cor" placeholder="EX: VERMELHO PEROLADO" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Placa</label>
+            <input type="text" id="fm-placa" placeholder="ABC-1234 OU ABC1D23" maxlength="8" oninput="mascaraPlaca(this)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações adicionais -->
+      <div style="background:var(--bg3);border-radius:8px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">📋 Informações Adicionais</div>
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Quilometragem Atual</label>
+            <input type="number" id="fm-km" min="0" placeholder="EX: 15000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Combustível</label>
+            <select id="fm-combustivel">
+              <option value="">SELECIONE...</option>
+              <option value="GASOLINA">GASOLINA</option>
+              <option value="FLEX">FLEX (GASOLINA/ETANOL)</option>
+              <option value="ELÉTRICA">ELÉTRICA</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Observações / Histórico</label>
+            <textarea id="fm-obs" placeholder="OBSERVAÇÕES GERAIS, MODIFICAÇÕES, HISTÓRICO DE PROBLEMAS..."></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModalMoto()">CANCELAR</button>
+      <button class="btn btn-primary" onclick="salvarMoto()">💾 SALVAR MOTO</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO EXCLUSÃO MOTO -->
+<div class="overlay" id="overlay-confirma-moto">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <span class="modal-title">CONFIRMAR EXCLUSÃO</span>
+    </div>
+    <p style="color:var(--muted);margin-bottom:24px">Tem certeza que deseja remover esta moto do cadastro? Essa ação não pode ser desfeita.</p>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharConfirmaMoto()">CANCELAR</button>
+      <button class="btn btn-danger" onclick="confirmarExclusaoMoto()">🗑️ EXCLUIR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SERVIÇO -->
+<div class="overlay" id="overlay-servico">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-titulo">Novo Serviço</span>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- ── BLOCO: CLIENTE / MOTO ── -->
+      <div style="background:var(--bg3);border-radius:10px;padding:16px;border:1px solid var(--border)">
+
+        <!-- Tabs: Selecionar cadastrado | Digitar manual -->
+        <div style="display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+          <button id="tab-cadastrado" type="button"
+            style="flex:1;padding:9px 0;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s;background:var(--accent);color:#fff;letter-spacing:.5px"
+            onclick="trocarTabCliente('cadastrado')">
+            🔍 SELECIONAR CADASTRADO
+          </button>
+          <button id="tab-manual" type="button"
+            style="flex:1;padding:9px 0;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s;background:var(--bg2);color:var(--muted);letter-spacing:.5px"
+            onclick="trocarTabCliente('manual')">
+            ✏️ DIGITAR MANUALMENTE
+          </button>
+        </div>
+
+        <!-- PAINEL: Selecionar cadastrado -->
+        <div id="painel-cadastrado">
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">Cliente / Moto Cadastrada</label>
+            <select id="f-moto-select" onchange="preencherMotoSelecionada(this.value)" style="width:100%">
+              <option value="">— SELECIONE UM CLIENTE / MOTO —</option>
+            </select>
+          </div>
+
+          <!-- Card de info da moto selecionada -->
+          <div id="f-moto-info" style="display:none;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+            <div style="background:var(--bg2);padding:8px 12px;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px">
+              📋 Dados do Cadastro
+            </div>
+            <div id="f-moto-info-body" style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;line-height:1.7"></div>
+          </div>
+
+          <div id="aviso-sem-motos" style="display:none;text-align:center;padding:16px;color:var(--muted);font-size:13px">
+            Nenhuma moto cadastrada ainda.<br>
+            <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="fecharModal();showPage('motos',document.querySelector('.nav-btn:nth-child(3)'))">
+              🏍️ Cadastrar Moto
+            </button>
+          </div>
+        </div>
+
+        <!-- PAINEL: Digitar manualmente -->
+        <div id="painel-manual" style="display:none">
+          <div class="form-grid form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Nome do Cliente</label>
+              <input type="text" id="f-cliente-manual" placeholder="NOME COMPLETO">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CPF do Cliente</label>
+              <input type="text" id="f-cpf-manual" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Marca *</label>
+              <select id="f-marca-manual">
+                <option value="">SELECIONE...</option>
+                <option>HONDA</option><option>YAMAHA</option><option>SUZUKI</option>
+                <option>KAWASAKI</option><option>TRIUMPH</option><option>BMW</option>
+                <option>HARLEY-DAVIDSON</option><option>DUCATI</option>
+                <option>ROYAL ENFIELD</option><option>OUTRA</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Modelo *</label>
+              <input type="text" id="f-modelo-manual" placeholder="EX: CG 160, FACTOR 150...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cilindrada (CC)</label>
+              <input type="number" id="f-cilindrada-manual" placeholder="EX: 160" min="50" max="9999">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cor</label>
+              <input type="text" id="f-cor-manual" placeholder="EX: VERMELHO PEROLADO">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Placa</label>
+              <input type="text" id="f-placa-manual" placeholder="ABC-1234" maxlength="8" oninput="mascaraPlaca(this)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ano de Fabricação</label>
+              <input type="number" id="f-ano-manual" placeholder="2024" min="1950" max="2099">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Campos ocultos unificados (preenchidos por qualquer modo) -->
+      <input type="hidden" id="f-cliente">
+      <input type="hidden" id="f-cpf">
+      <input type="hidden" id="f-moto">
+
+      <!-- ── SERVIÇO ── -->
+      <div class="form-group">
+        <label class="form-label">Descrição do Serviço *</label>
+        <textarea id="f-descricao" placeholder="DESCREVA O SERVIÇO REALIZADO..." required></textarea>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Valor (R$) *</label>
+          <input type="number" id="f-valor" min="0" step="0.01" placeholder="0,00" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Forma de Pagamento *</label>
+          <select id="f-pagamento" required>
+            <option value="">Selecione...</option>
+            <option value="pix">Pix</option>
+            <option value="debito">Cartão de Débito</option>
+            <option value="credito">Cartão de Crédito</option>
+            <option value="dinheiro">Dinheiro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Data/Hora de Entrada *</label>
+          <input type="datetime-local" id="f-entrada" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data/Hora de Saída</label>
+          <input type="datetime-local" id="f-saida">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status do Pagamento *</label>
+        <select id="f-status" required>
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarServico()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div class="overlay" id="overlay-confirma">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <span class="modal-title">Confirmar exclusão</span>
+    </div>
+    <p style="color:var(--muted);margin-bottom:24px">Tem certeza que deseja remover este serviço? Essa ação não pode ser desfeita.</p>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharConfirma()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarExclusao()">🗑️ Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPRESSÃO -->
+<div class="overlay" id="overlay-impressao">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title">🖨️ Imprimir Relatório Contábil</span>
+      <button class="modal-close" onclick="fecharModalImpressao()">✕</button>
+    </div>
+    <div class="print-modal-body">
+      <p style="color:var(--muted);font-size:13px">Selecione o mês e ano para gerar o relatório contábil no formato de nota fiscal.</p>
+      <div class="print-select-row">
+        <div class="form-group">
+          <label class="form-label">Mês</label>
+          <select id="print-mes">
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+            <option value="3">Março</option><option value="4">Abril</option>
+            <option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7">Julho</option><option value="8">Agosto</option>
+            <option value="9">Setembro</option><option value="10">Outubro</option>
+            <option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ano</label>
+          <input type="number" id="print-ano" min="2020" max="2099" style="width:90px">
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--muted)">
+        📄 O relatório será gerado no formato de <strong style="color:var(--text)">nota fiscal contábil</strong> com todos os serviços do período, totais por forma de pagamento e resumo financeiro para a contabilidade.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModalImpressao()">Cancelar</button>
+      <button class="btn btn-primary" onclick="executarImpressao()">🖨️ Gerar e Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<!-- RELATÓRIO CONTÁBIL PARA IMPRESSÃO (oculto em tela, visível ao imprimir) -->
+<div id="relatorio-impressao"></div>
+
+<!-- RECIBO TÉRMICO PARA IMPRESSÃO -->
+<div id="recibo-termico"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   VALTER MOTOS — Sistema de Gestão de Serviços
+   Versão: 1.0  |  Desenvolvido com HTML, CSS e JS puro
+   ============================================================ */
+
+// ── ESTADO DA APLICAÇÃO ──────────────────────────────────────
+let servicos   = JSON.parse(localStorage.getItem('vm_servicos') || '[]');
+let editandoId = null;
+let excluindoId = null;
+let ordenacao  = { campo: 'entrada', asc: false };
+
+// ── UTILIDADES ───────────────────────────────────────────────
+
+/** Máscara de CPF */
+function mascaraCPF(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+  input.value = v;
+}
+
+/** Formata valor em Real brasileiro */
+function fmtBRL(v) {
+  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/** Formata datetime-local para exibição */
+function fmtDT(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+/** Retorna badge HTML para status */
+function badgeStatus(s) {
+  return s === 'pago'
+    ? `<span class="badge badge-green">✔ Pago</span>`
+    : `<span class="badge badge-red">⚠ Pendente</span>`;
+}
+
+/** Retorna badge HTML para forma de pagamento */
+function badgePag(p) {
+  const map = {
+    pix:      ['badge-blue',   '🔵 Pix'],
+    debito:   ['badge-green',  '💳 Débito'],
+    credito:  ['badge-orange', '💳 Crédito'],
+    dinheiro: ['badge-yellow', '💵 Dinheiro'],
+  };
+  const [cls, txt] = map[p] || ['badge-yellow', p];
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+
+/** Salva servicos no localStorage */
+function salvar() {
+  localStorage.setItem('vm_servicos', JSON.stringify(servicos));
+}
+
+/** Gera ID único */
+function gerarId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+/** Exibe toast de notificação */
+function toast(msg, tipo = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + tipo;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = '', 3000);
+}
+
+// ── NAVEGAÇÃO ────────────────────────────────────────────────
+
+function showPage(nome, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + nome).classList.add('active');
+  btn.classList.add('active');
+
+  // Atualiza a página ao navegar
+  if (nome === 'dashboard')   renderDashboard();
+  if (nome === 'servicos')    renderServicos();
+  if (nome === 'motos')       renderMotos();
+  if (nome === 'relatorio')   atualizarRelatorio();
+  if (nome === 'fechamento')  atualizarFechamento();
+  if (nome === 'config')      carregarConfigNaTela();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────
+
+function renderDashboard() {
+  const total     = servicos.reduce((s, x) => s + Number(x.valor), 0);
+  const pagos     = servicos.filter(x => x.status === 'pago');
+  const pendentes = servicos.filter(x => x.status === 'pendente');
+  const totalPago = pagos.reduce((s, x) => s + Number(x.valor), 0);
+
+  document.getElementById('dashboard-cards').innerHTML = `
+    <div class="card orange">
+      <div class="card-icon">💰</div>
+      <div class="card-label">Total Faturado</div>
+      <div class="card-value">${fmtBRL(total)}</div>
+    </div>
+    <div class="card blue">
+      <div class="card-icon">🔧</div>
+      <div class="card-label">Total de Serviços</div>
+      <div class="card-value">${servicos.length}</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">✔</div>
+      <div class="card-label">Total Recebido</div>
+      <div class="card-value">${fmtBRL(totalPago)}</div>
+    </div>
+    <div class="card red">
+      <div class="card-icon">⚠</div>
+      <div class="card-label">Pendentes</div>
+      <div class="card-value">${pendentes.length}</div>
+    </div>
+  `;
+
+  // Últimos 5 serviços
+  const recentes = [...servicos]
+    .sort((a, b) => new Date(b.entrada) - new Date(a.entrada))
+    .slice(0, 5);
+
+  const tbody = document.getElementById('tbody-recentes');
+  if (!recentes.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum serviço cadastrado ainda.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = recentes.map(s => `
+    <tr>
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><strong>${s.moto}</strong></td>
+      <td>${s.descricao.slice(0,40)}${s.descricao.length>40?'…':''}</td>
+      <td>${fmtBRL(s.valor)}</td>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── SERVIÇOS — LISTAGEM ──────────────────────────────────────
+
+function getServicosFiltrados() {
+  const texto  = (document.getElementById('filtro-texto')?.value || '').toLowerCase();
+  const inicio = document.getElementById('filtro-inicio')?.value;
+  const fim    = document.getElementById('filtro-fim')?.value;
+  const status = document.getElementById('filtro-status')?.value;
+  const pag    = document.getElementById('filtro-pagamento')?.value;
+
+  let lista = [...servicos];
+
+  if (texto) lista = lista.filter(s =>
+    s.moto.toLowerCase().includes(texto) ||
+    s.descricao.toLowerCase().includes(texto) ||
+    (s.cliente || '').toLowerCase().includes(texto) ||
+    (s.cpf || '').includes(texto));
+
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  if (status) lista = lista.filter(s => s.status === status);
+  if (pag)    lista = lista.filter(s => s.pagamento === pag);
+
+  // Ordenação
+  const ordem = document.getElementById('filtro-ordem')?.value || 'recente';
+  if (ordem === 'recente') lista.sort((a,b) => new Date(b.entrada)-new Date(a.entrada));
+  if (ordem === 'antigo')  lista.sort((a,b) => new Date(a.entrada)-new Date(b.entrada));
+  if (ordem === 'maior')   lista.sort((a,b) => b.valor - a.valor);
+  if (ordem === 'menor')   lista.sort((a,b) => a.valor - b.valor);
+
+  return lista;
+}
+
+function renderServicos() {
+  const lista = getServicosFiltrados();
+  const tbody = document.getElementById('tbody-servicos');
+
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🔧</div>Nenhum serviço encontrado.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(s => `
+    <tr style="${s.status==='pendente'?'background:rgba(239,68,68,.04)':''}">
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><strong>${s.moto}</strong></td>
+      <td title="${s.descricao}">${s.descricao.slice(0,35)}${s.descricao.length>35?'…':''}</td>
+      <td><strong>${fmtBRL(s.valor)}</strong></td>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${fmtDT(s.saida)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="abrirModal('${s.id}')">✏️</button>
+          ${s.status === 'pago'
+            ? `<button class="btn btn-info btn-sm" title="Imprimir Recibo" onclick="imprimirRecibo('${s.id}')">🖨️</button>`
+            : `<button class="btn btn-ghost btn-sm" title="Pagamento pendente — não é possível imprimir" style="opacity:.35;cursor:not-allowed" disabled>🖨️</button>`}
+          <button class="btn btn-danger btn-sm" onclick="pedirExclusao('${s.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function aplicarFiltros() { renderServicos(); }
+
+function limparFiltros() {
+  ['filtro-texto','filtro-status','filtro-pagamento'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['filtro-inicio','filtro-fim'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('filtro-ordem').value = 'recente';
+  renderServicos();
+}
+
+function ordenarPor(campo) {
+  if (ordenacao.campo === campo) ordenacao.asc = !ordenacao.asc;
+  else { ordenacao.campo = campo; ordenacao.asc = true; }
+  const ordem = document.getElementById('filtro-ordem');
+  if (campo === 'valor') ordem.value = ordenacao.asc ? 'menor' : 'maior';
+  else if (campo === 'entrada') ordem.value = ordenacao.asc ? 'antigo' : 'recente';
+  renderServicos();
+}
+
+// ── MODAL — ADICIONAR / EDITAR ────────────────────────────────
+
+function trocarTabCliente(modo) {
+  const isCad = modo === 'cadastrado';
+  document.getElementById('painel-cadastrado').style.display = isCad ? '' : 'none';
+  document.getElementById('painel-manual').style.display     = isCad ? 'none' : '';
+  const btnCad = document.getElementById('tab-cadastrado');
+  const btnMan = document.getElementById('tab-manual');
+  btnCad.style.background = isCad ? 'var(--accent)' : 'var(--bg2)';
+  btnCad.style.color      = isCad ? '#fff' : 'var(--muted)';
+  btnMan.style.background = isCad ? 'var(--bg2)' : 'var(--accent)';
+  btnMan.style.color      = isCad ? 'var(--muted)' : '#fff';
+  // Limpa campos do outro painel
+  if (isCad) {
+    ['f-cliente-manual','f-cpf-manual','f-modelo-manual','f-cilindrada-manual','f-cor-manual','f-placa-manual','f-ano-manual']
+      .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-marca-manual').value = '';
+  } else {
+    document.getElementById('f-moto-select').value = '';
+    document.getElementById('f-moto-info').style.display = 'none';
+  }
+}
+
+function abrirModal(id = null) {
+  editandoId = id;
+  document.getElementById('modal-titulo').textContent = id ? 'Editar Serviço' : 'Novo Serviço';
+
+  popularSelectMotos();
+
+  if (id) {
+    const s = servicos.find(x => x.id === id);
+    document.getElementById('f-descricao').value = s.descricao;
+    document.getElementById('f-valor').value     = s.valor;
+    document.getElementById('f-pagamento').value = s.pagamento;
+    document.getElementById('f-entrada').value   = s.entrada;
+    document.getElementById('f-saida').value     = s.saida || '';
+    document.getElementById('f-status').value    = s.status;
+
+    if (s.motoId && motos.find(m => m.id === s.motoId)) {
+      // Modo cadastrado
+      trocarTabCliente('cadastrado');
+      document.getElementById('f-moto-select').value = s.motoId;
+      exibirInfoMoto(s.motoId);
+    } else {
+      // Modo manual — reconstrói campos a partir do serviço salvo
+      trocarTabCliente('manual');
+      document.getElementById('f-cliente-manual').value = s.cliente || '';
+      document.getElementById('f-cpf-manual').value     = s.cpf || '';
+      // Tenta extrair campos do campo moto (texto livre)
+      document.getElementById('f-modelo-manual').value  = s.moto || '';
+    }
+  } else {
+    // Novo serviço — abre em modo cadastrado por padrão
+    trocarTabCliente('cadastrado');
+    document.getElementById('f-moto-select').value = '';
+    document.getElementById('f-moto-info').style.display = 'none';
+    ['f-descricao','f-valor','f-saida'].forEach(fid => document.getElementById(fid).value = '');
+    document.getElementById('f-pagamento').value = '';
+    document.getElementById('f-status').value    = 'pendente';
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('f-entrada').value = now.toISOString().slice(0,16);
+  }
+
+  document.getElementById('overlay-servico').classList.add('open');
+}
+
+function popularSelectMotos() {
+  const sel = document.getElementById('f-moto-select');
+  const valorAtual = sel.value;
+  sel.innerHTML = '<option value="">— SELECIONE UM CLIENTE / MOTO —</option>';
+
+  const avisoSem = document.getElementById('aviso-sem-motos');
+
+  if (motos.length === 0) {
+    avisoSem.style.display = '';
+    sel.style.display = 'none';
+    return;
+  }
+  avisoSem.style.display = 'none';
+  sel.style.display = '';
+
+  // Agrupa por proprietário, depois por marca
+  const porProp = motos.reduce((acc, m) => {
+    const grpLabel = m.proprietario
+      ? `👤 ${m.proprietario}${m.cpf ? ' — ' + m.cpf : ''}`
+      : '👤 SEM PROPRIETÁRIO';
+    if (!acc[grpLabel]) acc[grpLabel] = [];
+    acc[grpLabel].push(m);
+    return acc;
+  }, {});
+
+  Object.entries(porProp).sort().forEach(([prop, lista]) => {
+    const grp = document.createElement('optgroup');
+    grp.label = prop;
+    lista.sort((a,b) => (a.modelo||'').localeCompare(b.modelo||'')).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      const placa = m.placa ? ` [${m.placa}]` : '';
+      const ano   = m.anoFab ? ` ${m.anoFab}` : '';
+      const cc    = m.cilindrada ? ` ${m.cilindrada}CC` : '';
+      opt.textContent = `${m.marca} ${m.modelo}${ano}${cc}${placa}`;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+
+  sel.value = valorAtual;
+}
+
+function preencherMotoSelecionada(motoId) {
+  const infoBox = document.getElementById('f-moto-info');
+  if (!motoId) { infoBox.style.display = 'none'; return; }
+  exibirInfoMoto(motoId);
+}
+
+function exibirInfoMoto(motoId) {
+  const m = motos.find(x => x.id === motoId);
+  const box    = document.getElementById('f-moto-info');
+  const body   = document.getElementById('f-moto-info-body');
+  if (!m) { box.style.display = 'none'; return; }
+
+  const linha = (icon, label, val) => val
+    ? `<div style="display:flex;gap:5px;align-items:baseline">
+        <span style="color:var(--muted);font-size:10px;min-width:70px;text-transform:uppercase">${icon} ${label}</span>
+        <strong style="color:var(--text)">${val}</strong>
+       </div>`
+    : '';
+
+  body.innerHTML = [
+    linha('🏍️','Veículo',   `${m.marca} ${m.modelo}`),
+    linha('📅','Ano',       m.anoFab || ''),
+    linha('🎨','Cor',        m.cor),
+    linha('⚙️','Cilindrada', m.cilindrada ? m.cilindrada + ' CC' : ''),
+    linha('🔖','Placa',      m.placa),
+    linha('📍','KM',         m.km ? m.km.toLocaleString('pt-BR') + ' km' : ''),
+    linha('👤','Proprietário', m.proprietario),
+    linha('📱','Telefone',   m.telefone),
+    linha('📋','CPF',        m.cpf),
+  ].filter(Boolean).join('');
+
+  box.style.display = 'block';
+}
+
+function fecharModal() {
+  document.getElementById('overlay-servico').classList.remove('open');
+  editandoId = null;
+}
+
+function salvarServico() {
+  const descricao = document.getElementById('f-descricao').value.trim().toUpperCase();
+  const valor     = parseFloat(document.getElementById('f-valor').value);
+  const pagamento = document.getElementById('f-pagamento').value;
+  const entrada   = document.getElementById('f-entrada').value;
+  const saida     = document.getElementById('f-saida').value;
+  const status    = document.getElementById('f-status').value;
+
+  // ── Resolve cliente/moto conforme o modo ativo ──
+  const modoCadastrado = document.getElementById('painel-cadastrado').style.display !== 'none';
+  let cliente = '', cpf = '', moto = '', motoId = null;
+
+  if (modoCadastrado) {
+    motoId = document.getElementById('f-moto-select').value;
+    if (!motoId) return toast('SELECIONE UMA MOTO CADASTRADA OU USE O MODO MANUAL.', 'error');
+    const m = motos.find(x => x.id === motoId);
+    if (m) {
+      cliente = (m.proprietario || '').toUpperCase();
+      cpf     = m.cpf || '';
+      moto    = `${m.marca} ${m.modelo}${m.anoFab ? ' ' + m.anoFab : ''}${m.cilindrada ? ' ' + m.cilindrada + 'CC' : ''}`.toUpperCase();
+    }
+  } else {
+    const marca  = document.getElementById('f-marca-manual').value.trim().toUpperCase();
+    const modelo = document.getElementById('f-modelo-manual').value.trim().toUpperCase();
+    if (!modelo) return toast('INFORME O MODELO DO VEÍCULO.', 'error');
+    const cc  = document.getElementById('f-cilindrada-manual').value;
+    const ano = document.getElementById('f-ano-manual').value;
+    cliente = document.getElementById('f-cliente-manual').value.trim().toUpperCase();
+    cpf     = document.getElementById('f-cpf-manual').value.trim();
+    moto    = [marca, modelo, ano ? ano : '', cc ? cc + 'CC' : ''].filter(Boolean).join(' ').trim();
+    motoId  = null;
+  }
+
+  // Validações gerais
+  if (!moto)              return toast('INFORME O VEÍCULO.', 'error');
+  if (!descricao)         return toast('DESCREVA O SERVIÇO REALIZADO.', 'error');
+  if (!valor || valor<=0) return toast('INFORME UM VALOR VÁLIDO.', 'error');
+  if (!pagamento)         return toast('SELECIONE A FORMA DE PAGAMENTO.', 'error');
+  if (!entrada)           return toast('INFORME A DATA/HORA DE ENTRADA.', 'error');
+
+  if (editandoId) {
+    const idx = servicos.findIndex(s => s.id === editandoId);
+    servicos[idx] = { ...servicos[idx], cliente, cpf, moto, motoId, descricao, valor, pagamento, entrada, saida, status };
+    toast('SERVIÇO ATUALIZADO COM SUCESSO!');
+  } else {
+    servicos.push({ id: gerarId(), cliente, cpf, moto, motoId, descricao, valor, pagamento, entrada, saida, status });
+    toast('SERVIÇO CADASTRADO COM SUCESSO!');
+  }
+
+  salvar();
+  fecharModal();
+  renderServicos();
+  renderDashboard();
+  if (document.getElementById('page-motos').classList.contains('active')) renderMotos();
+}
+
+// ── EXCLUSÃO ─────────────────────────────────────────────────
+
+function pedirExclusao(id) {
+  excluindoId = id;
+  document.getElementById('overlay-confirma').classList.add('open');
+}
+
+function fecharConfirma() {
+  document.getElementById('overlay-confirma').classList.remove('open');
+  excluindoId = null;
+}
+
+function confirmarExclusao() {
+  servicos = servicos.filter(s => s.id !== excluindoId);
+  salvar();
+  fecharConfirma();
+  renderServicos();
+  renderDashboard();
+  toast('Serviço removido.', 'error');
+}
+
+// ── RELATÓRIOS ────────────────────────────────────────────────
+
+function filtrarMesAtual() {
+  const now  = new Date();
+  const ano  = now.getFullYear();
+  const mes  = String(now.getMonth() + 1).padStart(2, '0');
+  const ini  = `${ano}-${mes}-01`;
+  const fim  = `${ano}-${mes}-${String(new Date(ano, now.getMonth()+1, 0).getDate()).padStart(2,'0')}`;
+  document.getElementById('rel-inicio').value = ini;
+  document.getElementById('rel-fim').value    = fim;
+  atualizarRelatorio();
+}
+
+function atualizarRelatorio() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  lista.sort((a,b) => new Date(b.entrada)-new Date(a.entrada));
+
+  const total     = lista.reduce((s,x) => s + Number(x.valor), 0);
+  const pagos     = lista.filter(x => x.status==='pago').reduce((s,x) => s + Number(x.valor), 0);
+  const pendentes = lista.filter(x => x.status==='pendente').reduce((s,x) => s + Number(x.valor), 0);
+
+  document.getElementById('rel-resumo').innerHTML = `
+    <div class="report-item">
+      <div class="label">Total Faturado</div>
+      <div class="value" style="color:var(--accent)">${fmtBRL(total)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Serviços</div>
+      <div class="value" style="color:var(--blue)">${lista.length}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Recebido</div>
+      <div class="value" style="color:var(--green)">${fmtBRL(pagos)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">A Receber</div>
+      <div class="value" style="color:var(--red)">${fmtBRL(pendentes)}</div>
+    </div>
+  `;
+
+  // Por forma de pagamento
+  const formas = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+  lista.filter(x => x.status==='pago').forEach(x => { if (formas[x.pagamento] !== undefined) formas[x.pagamento] += Number(x.valor); });
+
+  const nomePag = { pix:'🔵 Pix', debito:'💳 Débito', credito:'💳 Crédito', dinheiro:'💵 Dinheiro' };
+  document.getElementById('rel-pagamentos').innerHTML = Object.entries(formas).map(([k,v]) => `
+    <div class="report-item">
+      <div class="label">${nomePag[k]}</div>
+      <div class="value">${fmtBRL(v)}</div>
+    </div>
+  `).join('');
+
+  // Tabela
+  const tbody = document.getElementById('tbody-relatorio');
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum registro no período.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lista.map(s => `
+    <tr>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${s.moto}</td>
+      <td>${s.descricao.slice(0,40)}${s.descricao.length>40?'…':''}</td>
+      <td>${fmtBRL(s.valor)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── FECHAMENTO MENSAL ─────────────────────────────────────────
+
+function atualizarFechamento() {
+  const mes = parseInt(document.getElementById('fech-mes').value);
+  const ano = parseInt(document.getElementById('fech-ano').value);
+  if (!mes || !ano) return;
+
+  const ini = new Date(ano, mes-1, 1);
+  const fim = new Date(ano, mes, 0, 23, 59, 59);
+
+  const lista = servicos
+    .filter(s => {
+      const d = new Date(s.entrada);
+      return d >= ini && d <= fim;
+    })
+    .sort((a,b) => new Date(a.entrada)-new Date(b.entrada));
+
+  const total     = lista.reduce((s,x) => s + Number(x.valor), 0);
+  const pagos     = lista.filter(x => x.status==='pago').reduce((s,x) => s + Number(x.valor), 0);
+  const pendentes = lista.filter(x => x.status==='pendente').reduce((s,x) => s + Number(x.valor), 0);
+  const ultimoDia = new Date(ano, mes, 0).getDate();
+
+  document.getElementById('fech-resumo').innerHTML = `
+    <div class="report-item">
+      <div class="label">Fechamento</div>
+      <div class="value" style="font-size:1rem">${String(ultimoDia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Total Faturado</div>
+      <div class="value" style="color:var(--accent)">${fmtBRL(total)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Serviços</div>
+      <div class="value" style="color:var(--blue)">${lista.length}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">Recebido</div>
+      <div class="value" style="color:var(--green)">${fmtBRL(pagos)}</div>
+    </div>
+    <div class="report-item">
+      <div class="label">A Receber</div>
+      <div class="value" style="color:var(--red)">${fmtBRL(pendentes)}</div>
+    </div>
+  `;
+
+  const formas = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+  lista.filter(x => x.status==='pago').forEach(x => { if (formas[x.pagamento] !== undefined) formas[x.pagamento] += Number(x.valor); });
+  const nomePag = { pix:'🔵 Pix', debito:'💳 Débito', credito:'💳 Crédito', dinheiro:'💵 Dinheiro' };
+
+  document.getElementById('fech-pagamentos').innerHTML = Object.entries(formas).map(([k,v]) => `
+    <div class="report-item">
+      <div class="label">${nomePag[k]}</div>
+      <div class="value">${fmtBRL(v)}</div>
+    </div>
+  `).join('');
+
+  const tbody = document.getElementById('tbody-fechamento');
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum serviço neste mês.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lista.map(s => `
+    <tr>
+      <td>${fmtDT(s.entrada)}</td>
+      <td>${s.cliente ? `<strong>${s.cliente}</strong>${s.cpf ? `<br><small style="color:var(--muted)">${s.cpf}</small>` : ''}` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${s.moto}</td>
+      <td>${s.descricao.slice(0,40)}${s.descricao.length>40?'…':''}</td>
+      <td>${fmtBRL(s.valor)}</td>
+      <td>${badgeStatus(s.status)}</td>
+      <td>${badgePag(s.pagamento)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── EXPORTAÇÕES ───────────────────────────────────────────────
+
+/** Gera e faz download de arquivo CSV */
+function gerarCSV(lista, nomeArquivo) {
+  const header = ['ID','Cliente','CPF','Moto','Descrição','Valor','Entrada','Saída','Status','Pagamento'];
+  const linhas = lista.map(s => [
+    s.id,
+    `"${(s.cliente||'').replace(/"/g,'""')}"`,
+    `"${(s.cpf||'').replace(/"/g,'""')}"`,
+    `"${s.moto}"`,
+    `"${s.descricao.replace(/"/g,'""')}"`,
+    Number(s.valor).toFixed(2),
+    fmtDT(s.entrada),
+    fmtDT(s.saida),
+    s.status,
+    s.pagamento
+  ].join(';'));
+
+  const csv = '\uFEFF' + [header.join(';'), ...linhas].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = nomeArquivo;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Arquivo CSV exportado com sucesso!');
+}
+
+function exportarCSV() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  gerarCSV(lista, `valter-motos-relatorio-${Date.now()}.csv`);
+}
+
+function exportarFechamentoCSV() {
+  const mes = parseInt(document.getElementById('fech-mes').value);
+  const ano = parseInt(document.getElementById('fech-ano').value);
+  const ini = new Date(ano, mes-1, 1);
+  const fim = new Date(ano, mes, 0, 23, 59, 59);
+  const lista = servicos.filter(s => { const d = new Date(s.entrada); return d >= ini && d <= fim; });
+  gerarCSV(lista, `valter-motos-fechamento-${ano}-${String(mes).padStart(2,'0')}.csv`);
+}
+
+/** Exporta como XLSX via CSV (compatível com Excel) */
+function exportarXLSX() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+
+  const header = 'ID\tMoto\tDescrição\tValor\tEntrada\tSaída\tStatus\tPagamento\n';
+  const linhas = lista.map(s =>
+    [s.id, s.moto, s.descricao, Number(s.valor).toFixed(2), fmtDT(s.entrada), fmtDT(s.saida), s.status, s.pagamento].join('\t')
+  ).join('\n');
+
+  const blob = new Blob(['\uFEFF' + header + linhas], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `valter-motos-relatorio-${Date.now()}.xls`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Arquivo Excel exportado com sucesso!');
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────────
+
+function montarTextoRelatorio(lista, titulo) {
+  const total   = lista.reduce((s,x) => s + Number(x.valor), 0);
+  const pagos   = lista.filter(x => x.status==='pago').reduce((s,x) => s + Number(x.valor), 0);
+  const pend    = lista.filter(x => x.status==='pendente').reduce((s,x) => s + Number(x.valor), 0);
+  const formas  = { pix:0, debito:0, credito:0, dinheiro:0 };
+  lista.filter(x => x.status==='pago').forEach(x => { if (formas[x.pagamento]!==undefined) formas[x.pagamento] += Number(x.valor); });
+
+  let txt = `🏍️ *VALTER MOTOS*\n`;
+  txt += `📋 *${titulo}*\n`;
+  txt += `📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+  txt += `━━━━━━━━━━━━━━━━━━━━\n`;
+  txt += `💰 Total Faturado: *${fmtBRL(total)}*\n`;
+  txt += `✅ Recebido: *${fmtBRL(pagos)}*\n`;
+  txt += `⏳ A Receber: *${fmtBRL(pend)}*\n`;
+  txt += `🔧 Serviços: *${lista.length}*\n\n`;
+  txt += `━━━━ Formas de Pagamento ━━━━\n`;
+  txt += `🔵 Pix: ${fmtBRL(formas.pix)}\n`;
+  txt += `💳 Débito: ${fmtBRL(formas.debito)}\n`;
+  txt += `💳 Crédito: ${fmtBRL(formas.credito)}\n`;
+  txt += `💵 Dinheiro: ${fmtBRL(formas.dinheiro)}\n\n`;
+  txt += `━━━━━━ Detalhes ━━━━━━\n`;
+  lista.slice(0, 20).forEach(s => {
+    txt += `• ${fmtDT(s.entrada)} | ${s.moto} | ${fmtBRL(s.valor)} | ${s.status==='pago'?'✅':'⏳'}\n`;
+  });
+  if (lista.length > 20) txt += `_(+ ${lista.length-20} serviços)_\n`;
+  return txt;
+}
+
+function enviarWhatsApp() {
+  const inicio = document.getElementById('rel-inicio').value;
+  const fim    = document.getElementById('rel-fim').value;
+  let lista = [...servicos];
+  if (inicio) lista = lista.filter(s => s.entrada >= inicio);
+  if (fim)    lista = lista.filter(s => s.entrada <= fim + 'T23:59');
+  lista.sort((a,b) => new Date(b.entrada)-new Date(a.entrada));
+
+  const txt = montarTextoRelatorio(lista, 'Relatório de Serviços');
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
+function enviarFechamentoWhatsApp() {
+  const mes = parseInt(document.getElementById('fech-mes').value);
+  const ano = parseInt(document.getElementById('fech-ano').value);
+  const ini = new Date(ano, mes-1, 1);
+  const fim = new Date(ano, mes, 0, 23, 59, 59);
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const lista = servicos.filter(s => { const d = new Date(s.entrada); return d >= ini && d <= fim; });
+
+  const txt = montarTextoRelatorio(lista, `Fechamento de ${meses[mes-1]}/${ano}`);
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
+// ── MODAL IMPRESSÃO ──────────────────────────────────────────
+
+function abrirModalImpressao() {
+  const now = new Date();
+  document.getElementById('print-mes').value = now.getMonth() + 1;
+  document.getElementById('print-ano').value = now.getFullYear();
+  document.getElementById('overlay-impressao').classList.add('open');
+}
+
+function fecharModalImpressao() {
+  document.getElementById('overlay-impressao').classList.remove('open');
+}
+
+/**
+ * Gera o relatório contábil no formato de nota fiscal
+ * e dispara o diálogo de impressão do navegador.
+ */
+function executarImpressao() {
+  const mes    = parseInt(document.getElementById('print-mes').value);
+  const ano    = parseInt(document.getElementById('print-ano').value);
+  const meses  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  if (!mes || !ano) return toast('Selecione mês e ano.', 'error');
+
+  const ini  = new Date(ano, mes - 1, 1);
+  const fim  = new Date(ano, mes, 0, 23, 59, 59);
+  const lista = servicos
+    .filter(s => { const d = new Date(s.entrada); return d >= ini && d <= fim; })
+    .sort((a, b) => new Date(a.entrada) - new Date(b.entrada));
+
+  // Cálculos financeiros
+  const totalGeral  = lista.reduce((s, x) => s + Number(x.valor), 0);
+  const totalPago   = lista.filter(x => x.status === 'pago').reduce((s, x) => s + Number(x.valor), 0);
+  const totalPend   = lista.filter(x => x.status === 'pendente').reduce((s, x) => s + Number(x.valor), 0);
+  const qtdServicos = lista.length;
+  const ultimoDia   = new Date(ano, mes, 0).getDate();
+
+  // Totais por forma de pagamento (apenas pagos)
+  const formas = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+  lista.filter(x => x.status === 'pago').forEach(x => {
+    if (formas[x.pagamento] !== undefined) formas[x.pagamento] += Number(x.valor);
+  });
+
+  // Número do documento: AAAAMM
+  const numDoc = `${ano}${String(mes).padStart(2,'0')}`;
+  const hoje   = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const horaEmissao = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+
+  // Nomes das formas de pagamento
+  const nomePag = { pix: 'PIX', debito: 'Cartão Débito', credito: 'Cartão Crédito', dinheiro: 'Dinheiro' };
+
+  // ── Linhas da tabela de serviços ──
+  let linhasServicos = '';
+  if (!lista.length) {
+    linhasServicos = `<tr><td colspan="9" style="text-align:center;padding:12px;color:#777;font-style:italic">Nenhum serviço registrado neste período.</td></tr>`;
+  } else {
+    lista.forEach((s, i) => {
+      const entradaFmt = fmtDT(s.entrada);
+      const saidaFmt   = s.saida ? fmtDT(s.saida) : '—';
+      const statusTxt  = s.status === 'pago'
+        ? `<span class="nf-status-pago">PAGO</span>`
+        : `<span class="nf-status-pendente">PEND.</span>`;
+      const pagTxt = nomePag[s.pagamento] || s.pagamento;
+      const clienteTxt = s.cliente || '—';
+      const cpfTxt     = s.cpf     || '';
+      linhasServicos += `
+        <tr>
+          <td class="col-seq">${i + 1}</td>
+          <td class="col-cliente">${clienteTxt}${cpfTxt ? `<br><span style="font-size:7pt;color:#666">${cpfTxt}</span>` : ''}</td>
+          <td class="col-data">${entradaFmt}</td>
+          <td class="col-moto">${s.moto}</td>
+          <td class="col-desc">${s.descricao}</td>
+          <td class="col-saida">${saidaFmt}</td>
+          <td class="col-pag">${pagTxt}</td>
+          <td class="col-status">${statusTxt}</td>
+          <td class="col-valor">${fmtBRL(s.valor)}</td>
+        </tr>`;
+    });
+  }
+
+  // ── HTML do relatório contábil ──
+  const html = `
+  <div class="nf-page">
+
+    <!-- Cabeçalho -->
+    <div class="nf-header">
+      <div class="nf-empresa">
+        <div class="nf-empresa-nome">Valter Motos</div>
+        <div class="nf-empresa-sub">Oficina Mecânica de Motocicletas</div>
+        <div class="nf-empresa-info">
+          Cariacica — Espírito Santo — Brasil<br>
+          Serviços de manutenção, reparo e revisão de motocicletas
+        </div>
+      </div>
+      <div class="nf-docbox">
+        <div class="nf-docbox-title">Relatório Contábil</div>
+        <div class="nf-docbox-num">Nº ${numDoc}</div>
+        <div class="nf-docbox-periodo">${meses[mes-1].toUpperCase()} / ${ano}</div>
+        <div class="nf-docbox-emissao">Emitido em: ${hoje} às ${horaEmissao}</div>
+        <div class="nf-docbox-emissao">Competência: 01/${String(mes).padStart(2,'0')}/${ano} a ${String(ultimoDia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}</div>
+      </div>
+    </div>
+
+    <!-- Faixa de tipo de documento -->
+    <div class="nf-tipo-doc">Demonstrativo de Receitas de Serviços</div>
+
+    <!-- Resumo financeiro -->
+    <div class="nf-section">
+      <div class="nf-section-title">Resumo Mensal </div>
+      <div class="nf-resumo-grid">
+        <div class="nf-resumo-item">
+          <div class="nf-resumo-label">Total Recebido</div>
+          <div class="nf-resumo-valor">${fmtBRL(totalPago)}</div>
+        </div>
+        <div class="nf-resumo-item">
+          <div class="nf-resumo-label">A Receber (Pendente)</div>
+          <div class="nf-resumo-valor">${fmtBRL(totalPend)}</div>
+        </div>
+        <div class="nf-resumo-item">
+          <div class="nf-resumo-label">Qtd. de Serviços</div>
+          <div class="nf-resumo-valor">${qtdServicos}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totais por forma de pagamento -->
+    <div class="nf-section">
+      <div class="nf-section-title"> Forma de Pagamento (Pagamentos Confirmados)</div>
+      <div class="nf-pagamentos-grid">
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">PIX</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.pix)}</div>
+        </div>
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">Cartão Débito</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.debito)}</div>
+        </div>
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">Cartão Crédito</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.credito)}</div>
+        </div>
+        <div class="nf-pag-item">
+          <div class="nf-pag-label">Dinheiro (Espécie)</div>
+          <div class="nf-pag-valor">${fmtBRL(formas.dinheiro)}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de serviços -->
+    <div class="nf-section">
+      <div class="nf-section-title">Detalhes</div>
+      <div style="padding:0">
+        <table class="nf-table">
+          <thead>
+            <tr>
+              <th class="col-seq">#</th>
+              <th class="col-cliente">Cliente / CPF</th>
+              <th class="col-data">Dt. Entrada</th> 
+              <th class="col-moto">Veículo</th>
+              <th class="col-desc">Descrição do Serviço</th>
+              <th class="col-saida">Dt. Saída</th>
+              <th class="col-pag">Pagamento</th>
+              <th class="col-status">Status</th>
+              <th class="col-valor">Valor (R$)</th>
+            </tr>
+          </thead>
+          <tbody>${linhasServicos}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Totalizador -->
+    <div class="nf-totais">
+      <div class="nf-total-box">
+        <div class="nf-total-label">Total de Serviços</div>
+        <div class="nf-total-valor">${qtdServicos}</div>
+      </div>
+      <div class="nf-total-box">
+        <div class="nf-total-label">Total Recebido</div>
+        <div class="nf-total-valor">${fmtBRL(totalPago)}</div>
+      </div>
+      <div class="nf-total-box">
+        <div class="nf-total-label">A Receber</div>
+        <div class="nf-total-valor">${fmtBRL(totalPend)}</div>
+      </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="nf-footer">
+      <div class="nf-footer-obs">
+        <strong>Observações para Contabilidade:</strong><br>
+        • Atividade: Prestação de serviços mecânicos em motocicletas<br>
+        • Regime tributário: verificar junto ao contador<br>
+        • Período de competência: ${meses[mes-1]}/${ano}<br>
+        • Documento gerado pelo sistema interno Valter Motos
+      </div>
+      <div class="nf-footer-ass">
+        <div class="nf-footer-ass-line">
+          Valter Motos — Responsável<br>
+          ${hoje}
+        </div>
+      </div>
+    </div>
+
+    <!-- Aviso fiscal -->
+    <div class="nf-aviso-fiscal">
+      Este documento é um <strong>relatório contábil auxiliar</strong> emitido pelo sistema de gestão interno.
+      Não substitui Nota Fiscal de Serviço (NFS-e) ou documentos fiscais obrigatórios pela legislação tributária vigente.
+      Para apuração de tributos (ISS, IRPJ, CSLL, PIS, COFINS), consulte seu contador.
+    </div>
+
+  </div>`;
+
+  // Injeta o HTML no container de impressão
+  document.getElementById('relatorio-impressao').innerHTML = html;
+
+  // Fecha o modal e aciona a impressão
+  fecharModalImpressao();
+  setTimeout(() => window.print(), 150);
+}
+
+document.getElementById('overlay-impressao').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalImpressao();
+});
+
+// ── FECHAR MODAIS AO CLICAR FORA ─────────────────────────────
+
+document.getElementById('overlay-servico').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+document.getElementById('overlay-confirma').addEventListener('click', function(e) {
+  if (e.target === this) fecharConfirma();
+});
+
+// ── RECIBO TÉRMICO ────────────────────────────────────────────
+
+function imprimirRecibo(id) {
+  const s = servicos.find(x => x.id === id);
+  if (!s) return toast('Serviço não encontrado.', 'error');
+  if (s.status !== 'pago') return toast('Apenas serviços pagos podem ser impressos.', 'error');
+
+  const c        = cfgRecibo;
+  const hoje     = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const hora     = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const numRecibo = id.slice(-6).toUpperCase();
+
+  // Dados da moto vinculada (se houver)
+  const motoObj = s.motoId ? motos.find(m => m.id === s.motoId) : null;
+
+  const nomePag = {
+    pix:      'PIX',
+    debito:   'CARTÃO DÉBITO',
+    credito:  'CARTÃO CRÉDITO',
+    dinheiro: 'DINHEIRO',
+  };
+
+  function via(tipoVia) {
+    const viaLabel = tipoVia === 'cliente' ? '1ª VIA — CLIENTE' : '2ª VIA — OFICINA';
+
+    // Linha auxiliar reutilizável
+    const campo = (label, valor) => valor
+      ? `<div class="cup-campo">
+           <span class="cup-label">${label}</span>
+           <span class="cup-valor">${valor}</span>
+         </div>`
+      : '';
+
+    // Monta dados da moto
+    const marcaModelo = motoObj
+      ? `${motoObj.marca} ${motoObj.modelo}${motoObj.anoFab ? ' ' + motoObj.anoFab : ''}`
+      : s.moto;
+    const cilindrada = motoObj?.cilindrada ? motoObj.cilindrada + ' CC' : '';
+    const cor        = motoObj?.cor || '';
+    const placa      = motoObj?.placa || '';
+
+    return `
+    <div class="cupom-wrap">
+
+      <!-- ══ CABEÇALHO ══ -->
+      <div class="cup-header">
+        <div class="cup-nome">${c.nome}</div>
+        ${c.sub  ? `<div class="cup-sub">${c.sub}</div>` : ''}
+        <div class="cup-info">
+          ${c.end1}
+          ${c.tel  ? `<br>Fone: ${c.tel}` : ''}
+          ${c.cnpj ? `<br>${c.cnpj}` : ''}
+        </div>
+      </div>
+
+      <!-- ══ TÍTULO ══ -->
+      <div class="cup-titulo">Recibo de Serviço Prestado</div>
+
+      <!-- ══ Nº / DATA / VIA ══ -->
+      <div class="cup-numvia">
+        <span class="cup-num">Nº ${numRecibo}</span>
+        <span>${hoje} ${hora}</span>
+        <span class="cup-via">${viaLabel}</span>
+      </div>
+
+      <!-- ══ CLIENTE ══ -->
+      <div class="cup-secao">Dados do Cliente</div>
+      ${campo('Nome', s.cliente || 'NÃO INFORMADO')}
+      ${campo('CPF', s.cpf || 'NÃO INFORMADO')}
+
+      <!-- ══ VEÍCULO ══ -->
+      <div class="cup-secao">Dados do Veículo</div>
+      ${campo('Veículo', marcaModelo)}
+      ${campo('Cilindrada', cilindrada)}
+      ${campo('Cor', cor)}
+      ${campo('Placa', placa)}
+      ${motoObj?.km ? campo('KM', motoObj.km.toLocaleString('pt-BR') + ' km') : ''}
+
+      <!-- ══ SERVIÇO ══ -->
+      <div class="cup-secao">Descrição do Serviço</div>
+      <div class="cup-desc">${s.descricao}</div>
+
+      <!-- ══ DATAS ══ -->
+      ${s.entrada || s.saida ? `
+      <div class="cup-secao">Período</div>
+      ${campo('Entrada', s.entrada ? fmtDT(s.entrada) : '')}
+      ${campo('Saída',   s.saida   ? fmtDT(s.saida)   : '')}
+      ` : ''}
+
+      <!-- ══ PAGAMENTO ══ -->
+      <div class="cup-secao">Pagamento</div>
+      ${campo('Forma', nomePag[s.pagamento] || s.pagamento)}
+
+      <!-- ══ TOTAL ══ -->
+      <div class="cup-total">
+        <span class="cup-total-label">Total Mão de Obra</span>
+        <span class="cup-total-valor">${fmtBRL(s.valor)}</span>
+      </div>
+
+      <!-- ══ ASSINATURA ══ -->
+      ${c.showAss ? `<div class="cup-ass">${c.ass || c.nome}</div>` : ''}
+
+      <!-- ══ RODAPÉ ══ -->
+      ${c.rodape ? `<div class="cup-rodape">${c.rodape.replace(/\n/g,'<br>')}</div>` : ''}
+
+      <!-- ══ AVISO ══ -->
+      <div class="cup-aviso">${c.aviso || 'Este recibo comprova a prestação do serviço descrito acima.\nNão substitui Nota Fiscal de Serviços (NFS-e).'}</div>
+
+    </div>`;
+  }
+
+  const corte = `<div class="cup-corte">- - - - - - - - - - - - - - - - - - - -✂</div>`;
+  const html  = c.show2via
+    ? `${via('cliente')}${corte}${via('loja')}`
+    : via('cliente');
+
+  document.getElementById('recibo-termico').innerHTML = html;
+  document.body.classList.add('imprimindo-recibo');
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { document.body.classList.remove('imprimindo-recibo'); }, 500);
+  }, 150);
+}
+
+// ── CONFIGURAÇÕES DO RECIBO ───────────────────────────────────
+
+const CONFIG_DEFAULT = {
+  nome:        'Valter Motos',
+  sub:         'Oficina Mecânica',
+  end1:        'Cariacica — Espírito Santo',
+  tel:         '',
+  cnpj:        '',
+  titulo:      'Recibo de Serviço',
+  ass:         'Valter Motos — Responsável',
+  rodape:      'Este documento não substitui Nota Fiscal.\nGuarde este recibo como comprovante.',
+  aviso:       '',
+  showCliente: true,
+  showCpf:     true,
+  showEntrada: true,
+  showSaida:   true,
+  showPag:     true,
+  showAss:     true,
+  show2via:    true,
+  largura:     '80mm',
+  fonte:       '10pt',
+};
+
+let cfgRecibo = { ...CONFIG_DEFAULT, ...JSON.parse(localStorage.getItem('vm_cfg_recibo') || '{}') };
+
+function carregarConfigNaTela() {
+  document.getElementById('cfg-nome').value   = cfgRecibo.nome;
+  document.getElementById('cfg-sub').value    = cfgRecibo.sub;
+  document.getElementById('cfg-end1').value   = cfgRecibo.end1;
+  document.getElementById('cfg-tel').value    = cfgRecibo.tel;
+  document.getElementById('cfg-cnpj').value   = cfgRecibo.cnpj;
+  document.getElementById('cfg-titulo').value = cfgRecibo.titulo;
+  document.getElementById('cfg-ass').value    = cfgRecibo.ass;
+  document.getElementById('cfg-rodape').value = cfgRecibo.rodape;
+  document.getElementById('cfg-aviso').value  = cfgRecibo.aviso;
+  document.getElementById('cfg-show-cliente').checked = cfgRecibo.showCliente;
+  document.getElementById('cfg-show-cpf').checked     = cfgRecibo.showCpf;
+  document.getElementById('cfg-show-entrada').checked = cfgRecibo.showEntrada;
+  document.getElementById('cfg-show-saida').checked   = cfgRecibo.showSaida;
+  document.getElementById('cfg-show-pag').checked     = cfgRecibo.showPag;
+  document.getElementById('cfg-show-ass').checked     = cfgRecibo.showAss;
+  document.getElementById('cfg-show-2via').checked    = cfgRecibo.show2via;
+  document.getElementById('cfg-largura').value        = cfgRecibo.largura;
+  document.getElementById('cfg-fonte').value          = cfgRecibo.fonte;
+  atualizarPreview();
+}
+
+function lerConfigDaTela() {
+  const up = s => s.trim().toUpperCase();
+  return {
+    nome:        up(document.getElementById('cfg-nome').value)   || CONFIG_DEFAULT.nome,
+    sub:         up(document.getElementById('cfg-sub').value),
+    end1:        up(document.getElementById('cfg-end1').value),
+    tel:         document.getElementById('cfg-tel').value.trim(),
+    cnpj:        up(document.getElementById('cfg-cnpj').value),
+    titulo:      up(document.getElementById('cfg-titulo').value) || CONFIG_DEFAULT.titulo,
+    ass:         up(document.getElementById('cfg-ass').value),
+    rodape:      document.getElementById('cfg-rodape').value.trim().toUpperCase(),
+    aviso:       document.getElementById('cfg-aviso').value.trim().toUpperCase(),
+    showCliente: document.getElementById('cfg-show-cliente').checked,
+    showCpf:     document.getElementById('cfg-show-cpf').checked,
+    showEntrada: document.getElementById('cfg-show-entrada').checked,
+    showSaida:   document.getElementById('cfg-show-saida').checked,
+    showPag:     document.getElementById('cfg-show-pag').checked,
+    showAss:     document.getElementById('cfg-show-ass').checked,
+    show2via:    document.getElementById('cfg-show-2via').checked,
+    largura:     document.getElementById('cfg-largura').value,
+    fonte:       document.getElementById('cfg-fonte').value,
+  };
+}
+
+function salvarConfig() {
+  cfgRecibo = lerConfigDaTela();
+  localStorage.setItem('vm_cfg_recibo', JSON.stringify(cfgRecibo));
+  toast('Configurações salvas com sucesso!');
+}
+
+function restaurarPadrao() {
+  cfgRecibo = { ...CONFIG_DEFAULT };
+  carregarConfigNaTela();
+  toast('Configurações restauradas para o padrão.');
+}
+
+function atualizarPreview() {
+  const preview = document.getElementById('preview-recibo');
+  if (!preview) return;
+  const c = lerConfigDaTela();
+
+  const ex = {
+    cliente: 'João da Silva', cpf: '000.000.000-00',
+    moto: 'Honda CG 160',
+    descricao: 'Troca de óleo e filtro, regulagem de freios e revisão geral',
+    valor: 150, pagamento: 'pix',
+    entrada: new Date().toISOString(), saida: new Date().toISOString(),
+  };
+
+  const nomePagM = { pix:'PIX', debito:'Cartão Débito', credito:'Cartão Crédito', dinheiro:'Dinheiro' };
+  const hoje = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const hora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+
+  preview.innerHTML = `
+    <div class="prev-header">
+      <div class="prev-razao">${c.nome.replace(/[^\w\sÀ-ú]/g,'').trim() || 'VALTER MOTOS'}</div>
+      ${c.sub ? `<div class="prev-fantasia">${c.sub}</div>` : ''}
+      <div class="prev-end">${c.end1}${c.tel?'<br>Fone: '+c.tel:''}${c.cnpj?'<br>'+c.cnpj:'<br>CNPJ: não informado'}</div>
+    </div>
+
+    <div class="prev-titulo">NFC-e — Nota Fiscal de Consumidor Eletrônica</div>
+
+    <div class="prev-numvia">
+      <span>NFC-e Nº ABCD12 | Série 001</span>
+      <span style="font-weight:900">1ª VIA - CONSUMIDOR</span>
+    </div>
+
+    <div class="prev-secao">Itens do Documento Fiscal</div>
+
+    <div class="prev-itens-hdr">
+      <span>Descrição</span><span style="text-align:center">Qtd</span>
+      <span style="text-align:right">Vl.Unit</span><span style="text-align:right">Vl.Tot</span>
+    </div>
+    <div class="prev-item">
+      <span class="prev-item-desc">001 ${ex.moto.toUpperCase()} - ${ex.descricao.substring(0,40)}...</span>
+      <span style="text-align:center">1</span>
+      <span style="text-align:right;color:#555">R$150</span>
+      <span style="text-align:right;font-weight:700">R$150</span>
+    </div>
+
+    <hr class="prev-sep">
+
+    <div class="prev-secao">Totais</div>
+    <div class="prev-tot-linha"><span>Qtd. total de itens</span><span class="prev-tot-val">1</span></div>
+    <div class="prev-tot-linha"><span>Valor total dos serviços</span><span class="prev-tot-val">${fmtBRL(ex.valor)}</span></div>
+    <div class="prev-tot-linha"><span>Desconto</span><span class="prev-tot-val">R$ 0,00</span></div>
+    <div class="prev-tot-linha"><span>Tributos aprox. (IBPT)</span><span class="prev-tot-val">R$ 0,00</span></div>
+
+    <div class="prev-total">
+      <span class="prev-total-lbl">Valor a Pagar</span>
+      <span class="prev-total-num">${fmtBRL(ex.valor)}</span>
+    </div>
+
+    <div class="prev-secao">Forma de Pagamento</div>
+    <div class="prev-tot-linha"><span>${nomePagM[ex.pagamento]}</span><span class="prev-tot-val">${fmtBRL(ex.valor)}</span></div>
+    <div class="prev-tot-linha"><span>Troco</span><span class="prev-tot-val">R$ 0,00</span></div>
+
+    <hr class="prev-sep">
+
+    <div class="prev-secao">Consumidor</div>
+    <div class="prev-cons">
+      ${c.showCliente ? `<strong>Nome:</strong> ${ex.cliente}<br>` : '<strong>Consumidor:</strong> NÃO IDENTIFICADO<br>'}
+      ${c.showCpf ? `<strong>CPF:</strong> ${ex.cpf}<br>` : ''}
+      <strong>Veículo:</strong> ${ex.moto}
+      ${c.showEntrada ? `<br><strong>Entrada:</strong> ${fmtDT(ex.entrada)}` : ''}
+      ${c.showSaida   ? `<br><strong>Saída:</strong> ${fmtDT(ex.saida)}` : ''}
+    </div>
+
+    <hr class="prev-sep">
+
+    <div class="prev-chave">
+      <div class="prev-chave-ttl">Chave de Acesso</div>
+      <div class="prev-chave-num">0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000</div>
+    </div>
+
+    <div class="prev-qr"><div class="prev-qr-box"></div></div>
+    <div style="font-size:4pt;color:#777;text-align:center;margin-top:2px">Consulte em: nfce.sefaz.rs.gov.br</div>
+
+    <div style="font-size:4.5pt;color:#444;margin-top:3px;line-height:1.6">
+      <strong>Emissão:</strong> ${hoje} ${hora}<br>
+      <strong>Protocolo:</strong> 000000000000000
+    </div>
+
+    <div class="prev-aviso">
+      Documento Auxiliar da NFC-e<br>
+      ${c.aviso || 'Não é documento fiscal válido. Apenas apresentação.'}
+    </div>
+
+    ${c.show2via ? `
+      <div class="prev-corte">- - - - - - - - - -✂</div>
+      <div style="text-align:center;font-size:4pt;color:#777;border:1px dashed #ccc;padding:2px;margin:2px 0">2ª VIA — ESTABELECIMENTO (cópia idêntica)</div>
+    ` : ''}
+  `;
+}
+
+function testarImpressao() {
+  salvarConfig();
+  const exId = servicos[0]?.id;
+  if (exId) {
+    imprimirRecibo(exId);
+  } else {
+    toast('Adicione pelo menos um serviço para testar a impressão.', 'error');
+  }
+}
+
+// ── MÓDULO DE MOTOS ──────────────────────────────────────────
+
+let motos         = JSON.parse(localStorage.getItem('vm_motos') || '[]');
+let editandoMotoId = null;
+let excluindoMotoId = null;
+
+function salvarMotos() {
+  localStorage.setItem('vm_motos', JSON.stringify(motos));
+}
+
+function gerarIdMoto() {
+  return 'M' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+}
+
+/** Máscara de telefone */
+function mascaraTelefone(input) {
+  let v = input.value.replace(/\D/g,'').slice(0,11);
+  if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+  else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
+  input.value = v;
+}
+
+/** Máscara de placa (antiga e Mercosul) */
+function mascaraPlaca(input) {
+  let v = input.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,7);
+  if (v.length > 3) v = v.slice(0,3) + '-' + v.slice(3);
+  input.value = v;
+}
+
+function limparFiltrosMotos() {
+  document.getElementById('moto-filtro-texto').value = '';
+  document.getElementById('moto-filtro-marca').value = '';
+  document.getElementById('moto-filtro-ordem').value = 'recente';
+  renderMotos();
+}
+
+function getMotosFiltered() {
+  const txt   = (document.getElementById('moto-filtro-texto')?.value || '').toUpperCase();
+  const marca = document.getElementById('moto-filtro-marca')?.value || '';
+  const ordem = document.getElementById('moto-filtro-ordem')?.value || 'recente';
+
+  let lista = [...motos];
+
+  if (txt) lista = lista.filter(m =>
+    (m.modelo||'').includes(txt) ||
+    (m.marca||'').includes(txt) ||
+    (m.placa||'').includes(txt) ||
+    (m.proprietario||'').includes(txt) ||
+    (m.placa||'').includes(txt) ||
+    (m.cor||'').includes(txt)
+  );
+
+  if (marca) lista = lista.filter(m => m.marca === marca);
+
+  if (ordem === 'recente')      lista.sort((a,b) => b.criadoEm - a.criadoEm);
+  if (ordem === 'modelo')       lista.sort((a,b) => (a.modelo||'').localeCompare(b.modelo||''));
+  if (ordem === 'ano')          lista.sort((a,b) => (b.anoFab||0) - (a.anoFab||0));
+  if (ordem === 'proprietario') lista.sort((a,b) => (a.proprietario||'').localeCompare(b.proprietario||''));
+
+  return lista;
+}
+
+function renderMotos() {
+  // Cards resumo
+  const marcasUnicas = [...new Set(motos.map(m => m.marca).filter(Boolean))].length;
+  document.getElementById('motos-cards').innerHTML = `
+    <div class="card blue">
+      <div class="card-icon">🏍️</div>
+      <div class="card-label">MOTOS CADASTRADAS</div>
+      <div class="card-value">${motos.length}</div>
+    </div>
+    <div class="card orange">
+      <div class="card-icon">🏷️</div>
+      <div class="card-label">MARCAS DIFERENTES</div>
+      <div class="card-value">${marcasUnicas}</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">🔧</div>
+      <div class="card-label">COM SERVIÇOS</div>
+      <div class="card-value">${motos.filter(m => contarServicosMotos(m.id) > 0).length}</div>
+    </div>
+  `;
+
+  const lista = getMotosFiltered();
+  const tbody = document.getElementById('tbody-motos');
+
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🏍️</div>NENHUMA MOTO CADASTRADA AINDA.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(m => {
+    const qtdSvc = contarServicosMotos(m.id);
+    return `
+      <tr>
+        <td>
+          ${m.proprietario ? `<strong>${m.proprietario}</strong>` : '<span style="color:var(--muted)">—</span>'}
+          ${m.cpf ? `<br><small style="color:var(--muted)">${m.cpf}</small>` : ''}
+          ${m.telefone ? `<br><small style="color:var(--muted)">${m.telefone}</small>` : ''}
+        </td>
+        <td>
+          <strong>${m.marca || '—'} ${m.modelo || ''}</strong>
+          ${m.cilindrada ? `<br><small style="color:var(--muted)">${m.cilindrada} CC</small>` : ''}
+          ${m.combustivel ? `<br><small style="color:var(--muted)">${m.combustivel}</small>` : ''}
+        </td>
+        <td>${m.placa ? `<span class="badge badge-blue">${m.placa}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td>${m.anoFab || '—'}</td>
+        <td>
+          ${m.cor ? `<span style="display:inline-flex;align-items:center;gap:5px">
+            <span style="width:10px;height:10px;border-radius:50%;background:${corHex(m.cor)};border:1px solid rgba(255,255,255,.2);flex-shrink:0"></span>
+            ${m.cor}
+          </span>` : '—'}
+        </td>
+        <td>${m.cilindrada ? `${m.cilindrada} CC` : '—'}</td>
+        <td><small style="color:var(--muted);font-family:monospace">${m.cilindrada ? m.cilindrada + ' CC' : '—'}</small></td>
+        <td>
+          ${qtdSvc > 0
+            ? `<span class="badge badge-green">${qtdSvc} SERVIÇO${qtdSvc>1?'S':''}</span>`
+            : `<span class="badge badge-yellow">NENHUM</span>`}
+        </td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" title="EDITAR" onclick="abrirModalMoto('${m.id}')">✏️</button>
+            <button class="btn btn-info btn-sm" title="VER SERVIÇOS" onclick="verServicosMoto('${m.id}')">🔧</button>
+            <button class="btn btn-danger btn-sm" title="EXCLUIR" onclick="pedirExclusaoMoto('${m.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/** Conta quantos serviços foram registrados para uma moto pelo id */
+function contarServicosMotos(motoId) {
+  return servicos.filter(s => s.motoId === motoId).length;
+}
+
+/** Tenta aproximar a cor digitada para um hex para o bolinha */
+function corHex(cor) {
+  const mapa = {
+    'PRETO':'#222','BRANCO':'#f5f5f5','VERMELHO':'#e53e3e','AZUL':'#3b82f6',
+    'VERDE':'#22c55e','AMARELO':'#eab308','LARANJA':'#f97316','PRATA':'#9ca3af',
+    'CINZA':'#6b7280','MARROM':'#92400e','ROXO':'#7c3aed','ROSA':'#ec4899',
+    'DOURADO':'#d97706','BEGE':'#d2b48c','GRAFITE':'#374151',
+  };
+  const chave = Object.keys(mapa).find(k => cor.includes(k));
+  return chave ? mapa[chave] : '#8b8fa8';
+}
+
+function abrirModalMoto(id = null) {
+  editandoMotoId = id;
+  document.getElementById('modal-moto-titulo').textContent = id ? 'EDITAR MOTO' : 'NOVA MOTO';
+
+  const campos = ['fm-proprietario','fm-cpf','fm-telefone','fm-email','fm-marca','fm-modelo',
+    'fm-ano-fab','fm-cilindrada','fm-cor','fm-placa','fm-km','fm-combustivel','fm-obs'];
+
+  if (id) {
+    const m = motos.find(x => x.id === id);
+    document.getElementById('fm-proprietario').value = m.proprietario || '';
+    document.getElementById('fm-cpf').value         = m.cpf || '';
+    document.getElementById('fm-telefone').value    = m.telefone || '';
+    document.getElementById('fm-email').value       = m.email || '';
+    document.getElementById('fm-marca').value       = m.marca || '';
+    document.getElementById('fm-modelo').value      = m.modelo || '';
+    document.getElementById('fm-ano-fab').value     = m.anoFab || '';
+    document.getElementById('fm-cilindrada').value  = m.cilindrada || '';    document.getElementById('fm-cor').value         = m.cor || '';
+    document.getElementById('fm-placa').value       = m.placa || '';
+    document.getElementById('fm-km').value          = m.km || '';
+    document.getElementById('fm-combustivel').value = m.combustivel || '';
+    document.getElementById('fm-obs').value         = m.obs || '';
+  } else {
+    campos.forEach(id => { document.getElementById(id).value = ''; });
+  }
+
+  document.getElementById('overlay-moto').classList.add('open');
+  document.getElementById('fm-proprietario').focus();
+}
+
+function fecharModalMoto() {
+  document.getElementById('overlay-moto').classList.remove('open');
+  editandoMotoId = null;
+}
+
+function salvarMoto() {
+  const up = s => (s||'').trim().toUpperCase();
+
+  const marca  = up(document.getElementById('fm-marca').value);
+  const modelo = up(document.getElementById('fm-modelo').value);
+  const cor    = up(document.getElementById('fm-cor').value);
+  const anoFab = parseInt(document.getElementById('fm-ano-fab').value) || null;
+
+  if (!marca)  return toast('SELECIONE A MARCA DA MOTO.', 'error');
+  if (!modelo) return toast('INFORME O MODELO DA MOTO.', 'error');
+  if (!cor)    return toast('INFORME A COR DA MOTO.', 'error');
+  if (!anoFab) return toast('INFORME O ANO DE FABRICAÇÃO.', 'error');
+
+  const dados = {
+    proprietario: up(document.getElementById('fm-proprietario').value),
+    cpf:          document.getElementById('fm-cpf').value.trim(),
+    telefone:     document.getElementById('fm-telefone').value.trim(),
+    email:        up(document.getElementById('fm-email').value),
+    marca,
+    modelo,
+    anoFab,
+    cilindrada:   parseInt(document.getElementById('fm-cilindrada').value) || null,
+    cor,
+    placa:        up(document.getElementById('fm-placa').value),
+    km:           parseInt(document.getElementById('fm-km').value) || null,
+    combustivel:  document.getElementById('fm-combustivel').value,
+    obs:          up(document.getElementById('fm-obs').value),
+  };
+
+  if (editandoMotoId) {
+    const idx = motos.findIndex(m => m.id === editandoMotoId);
+    motos[idx] = { ...motos[idx], ...dados };
+    toast('MOTO ATUALIZADA COM SUCESSO!');
+  } else {
+    motos.push({ id: gerarIdMoto(), criadoEm: Date.now(), ...dados });
+    toast('MOTO CADASTRADA COM SUCESSO!');
+  }
+
+  salvarMotos();
+  fecharModalMoto();
+  renderMotos();
+}
+
+function pedirExclusaoMoto(id) {
+  excluindoMotoId = id;
+  document.getElementById('overlay-confirma-moto').classList.add('open');
+}
+
+function fecharConfirmaMoto() {
+  document.getElementById('overlay-confirma-moto').classList.remove('open');
+  excluindoMotoId = null;
+}
+
+function confirmarExclusaoMoto() {
+  motos = motos.filter(m => m.id !== excluindoMotoId);
+  salvarMotos();
+  fecharConfirmaMoto();
+  renderMotos();
+  toast('MOTO REMOVIDA.', 'error');
+}
+
+/** Navega para aba Serviços filtrando pela moto */
+function verServicosMoto(motoId) {
+  const m = motos.find(x => x.id === motoId);
+  if (!m) return;
+  // Pré-preenche o filtro de texto com o modelo
+  const navBtn = document.querySelector('.nav-btn:nth-child(2)');
+  showPage('servicos', navBtn);
+  document.getElementById('filtro-texto').value = `${m.marca} ${m.modelo}`;
+  aplicarFiltros();
+}
+
+function atualizarModelosPorMarca() {
+  // Opcional: pode preencher sugestões de modelo conforme marca selecionada
+}
+
+document.getElementById('overlay-moto').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalMoto();
+});
+
+document.getElementById('overlay-confirma-moto').addEventListener('click', function(e) {
+  if (e.target === this) fecharConfirmaMoto();
+});
+
+
+  // Configura mês/ano atual no fechamento
+(function init() {
+  const now = new Date();
+  document.getElementById('fech-mes').value = now.getMonth() + 1;
+  document.getElementById('fech-ano').value = now.getFullYear();
+
+  renderDashboard();
+})();
+</script>
+</body>
+</html>
